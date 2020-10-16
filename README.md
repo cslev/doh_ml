@@ -1,3 +1,6 @@
+```
+python3 ./train_and_test.py -C ./data/google -d google_df.pkl
+```
 # doh_ml
 This repository is for processing the data of doh_docker container via Python and ML techniques
 
@@ -88,7 +91,11 @@ optional arguments:
                         [MISC] Specify here any extra metadata (Default: None)
 ```
 
-# Example (using the supplied data)
+# Examples
+
+## Closed-world example
+Create a dataframe and model from a dataset, and evalute it within a closed-world setting
+
 In order to process the raw `.csv` files for DoH resolver `cloudflare` located under `./data/cloudflare` directory by using `4` CPU cores, 
 issue the following command. 
 This will also save the created dataframe and the ML model as `cloudflare_df.pkl` and as cloudflare_model.pkl, respectively.
@@ -97,4 +104,33 @@ Besides, it create histogram from the data, SHAP values for the model, and also 
 ```
 python3 ./train_and_test.py -R ./data/ -r cloudflare -d cloudflare_df.pkl -m cloudflare_model.pkl -H -S -P -c 4 
 ```
+
+
+## Open-world example
+Evaluate a created model within an open-world setting (using `4` CPU cores), 
+where the data for the latter (e.g., stored as `google`) is still in raw .csv files, however, the model we use is already built.
+
+
+```
+python3 ./train_and_test.py -M -m cloudflare_model.pkl -c 4 -O ./data/google 
+```
+
+
+We can create only a dataframe first from the raw data via:
+```
+python3 ./train_and_test.py -C  -d google_df.pkl -R ./data -r google
+```
+
+Use -r with a list to create dataframes according to more than one raw dataset.
+```
+python3 ./train_and_test.py -C  -d my_openworld_df.pkl -R ./data -r google,cleanbrowsing,quad9
+```
+
+
+Then, use the dataframe instead for the open-world evaluations"
+```
+python3 ./train_and_test.py -M -m cloudflare_model.pkl -c 4 -o my_openworld_df.pkl
+```
+
+
 
