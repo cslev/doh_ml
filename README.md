@@ -132,5 +132,8 @@ Then, use the dataframe instead for the open-world evaluations"
 python3 ./train_and_test.py -M -m cloudflare_model.pkl -c 4 -o my_openworld_df.pkl
 ```
 
+# How to get data?
+Check out [https://github.com/cslev/doh_docker](https://github.com/cslev/doh_docker)
+
 
 
