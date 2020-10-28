@@ -1,6 +1,11 @@
+import os
+import argparse
+
+#for regexp matching in the dataset filenames
+import re
+
 import numpy as np
 import pandas as pd
-import os
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -24,10 +29,8 @@ import math
 import shap
 import warnings
 
-import argparse
 
-#for regexp matching in the dataset filenames
-import re
+
 
 
 LOAD_DATAFRAME_BUILD_FROM_SCRATCH=0
@@ -46,7 +49,7 @@ parser.add_argument('-r',
 parser.add_argument('-R',
                     '--raw-traffic-traces-root',
                     action="store",
-                    default="/mnt/storage/Doh_traces",
+                    default="/mnt/storage/DoH_traces",
                     dest="traffic_traces_root",
                     help="[TRAINING] Specify here the root directory, where all traffic traces (.csv files) are, each put under a sub-directory used for -r argument (Default: /mnt/storage/Doh_traces)")
 
@@ -77,7 +80,7 @@ parser.add_argument('-M',
 parser.add_argument('-m',
                     '--ml-model-path',
                     action="store",
-                    default=None,
+                    default="last_model.pkl",
                     type=str,
                     dest="ml_model_path",
                     help="[TRAINING/TESTING] Specify the full path for the model to load/save (Default: None, i.e., model will not be saved)")
@@ -155,7 +158,7 @@ parser.add_argument('-C',
 parser.add_argument('-y',
                     '--output-dir',
                     action="store",
-                    default=".",
+                    default="./",
                     dest="output_dir",
                     help="[MISC] Output directory where histograms, shapley values, PRC curves and accuracy metrics will be saved. (Default: .)")
 
@@ -283,6 +286,8 @@ elif(PAD_TIME_LAG is not None):
 if(OVERRIDE_META is not None):
     META = OVERRIDE_META
 print("METADATA is set as: {}".format(META))
+
+
 
 
 #################################
@@ -785,14 +790,19 @@ def make_dataframe( load_dataframe=LOAD_DATAFRAME,
 
 def get_data_for_training(list_of_resolvers, base_path):
     tmp_res=dict()
-    # print(list_of_resolvers)
-    # print(base_path)
+    #print(list_of_resolvers)
+    #print(base_path)
     for r in list_of_resolvers:
         tmp_res[r] = list()
+        #print(base_path+r)
+        if not os.path.exists(base_path+r):
+            print("Path {} does not exists...exiting".format(str(base_path+r)))
+            exit(-1)
+
         for _,_,files in os.walk(base_path+r):
-            print(files)
+            #print(files)
             for filename in files:
-                # print(filename)
+                #print(filename)
                 #regexp for only the base csv files that has only numbers in them
                 if(re.search("^csvfile-[0-9]*-[0-9]*.csv",filename)) is not None:
                     tmp_res[r].append(base_path+r+"/"+filename)
@@ -805,7 +815,8 @@ def get_data_for_training(list_of_resolvers, base_path):
 
 def _load_all_data(list_of_files_with_explicit_path):
     df_count = 0
-    # print(list_of_files_with_explicit_path)
+    df=None
+    #print(list_of_files_with_explicit_path)
     for resolver_files_tuple in list_of_files_with_explicit_path.items():
         resolver=resolver_files_tuple[0]
         filenames=resolver_files_tuple[1]
@@ -824,6 +835,10 @@ def _load_all_data(list_of_files_with_explicit_path):
                 #we already have a dataframe, so we just append
                 df=pd.concat([df, df_tmp])
 #            print("[DONE]")
+    if df is None:
+        print("Something happened during file processing and no dataframe is built")
+        print("Exiting...")
+        exit(-1)
     #reset indices
     df=df.reset_index(drop=True)
     # print(df)
@@ -997,7 +1012,7 @@ def train_and_test(dataframe, load_model=LOAD_MODEL):
 
         return {"model":rfc, "x_test":open_world_x_test, "y_test":open_world_y_test, "open_world_dataframe":open_world_dataframe, "open_world_dataframe_name":open_world_dataframe_name}
 
-def make_shap(model,x_test,y_test):
+def make_shap(model,x_test,y_test,basename):
     explainer = shap.TreeExplainer(model)
     select = range(5)
     pyplot.clf()
@@ -1021,8 +1036,8 @@ def make_shap(model,x_test,y_test):
     # if OPEN_WORLD is not None: #to store the open world dataframe as well in the filename
     #     meta=meta + "_" + os.path.basename(OPEN_WORLD)
 
-    pyplot.savefig(OUTPUT_DIR+META+".shapley.pdf")
-    pyplot.savefig(OUTPUT_DIR+META+".shapley.png")
+    pyplot.savefig(OUTPUT_DIR+"/"+basename+META+".shapley.pdf")
+    pyplot.savefig(OUTPUT_DIR+"/"+basename+META+".shapley.png")
 
 def generate_histogram(dataframe, bin_start, bin_stop, bin_step, column_name, filename_base, xlabel="Packet value", ylabel="Number of packets"):
     print("Generating histogram...")
@@ -1066,7 +1081,7 @@ def generate_pr_csv(df_test, Label, model, resolver=RESOLVERS_FOR_TRAINING[0], b
     # print("lr_probs[:, 1]:{}".format(lr_probs))
     lr_precision, lr_recall, threshold = precision_recall_curve(Label, lr_probs)
 
-    basename=OUTPUT_DIR + basename
+    basename=OUTPUT_DIR + "/" +basename
     csv_file  = basename + ".csv"
     plot_file = basename + ".pdf"
     plot_file_png = basename + ".png"
@@ -1134,8 +1149,11 @@ if(HISTOGRAM):
 if(PRC):
     # CREATE PRC CURVES
     print("Generating PRC curve")
-    basename="PRC_"+META
-    if OPEN_WORLD is not None: #to store the open world dataframe as well in the filename
+    if(dataframe is not None): #there was dataframe created/loaded
+        basename="PRC_"+DATAFRAME_NAME+META
+    else: #there was NO dataframe created/loaded so use model name instead
+        basename="PRC_"+MODEL_NAME+META
+    if(CLOSED_WORLD == False): #to store the open world dataframe as well in the filename
         resolver=os.path.basename(OPEN_WORLD)
     generate_pr_csv(df_test=x_test,Label=y_test, model=model, resolver="",basename=basename)
 
@@ -1143,4 +1161,8 @@ if(PRC):
 if(SHAPLEY):
     # CREATE SHAP VALUES
     print("Creating SHAP values")
-    make_shap(model, x_test, y_test)
+    if(dataframe is not None): #there was dataframe created/loaded
+        basename="SHAP_"+DATAFRAME_NAME
+    else: #there was NO dataframe created/loaded so use model name instead
+        basename="SHAP_"+MODEL_NAME
+    make_shap(model, x_test, y_test,basename)
