@@ -16,7 +16,7 @@ import sys # for writing in the same line via sys.stdout
 
 from sklearn.utils import resample #for balancing the data set
 
-parser = argparse.ArgumentParser(description="Create Panda dataframes for doh_ml.py from " +
+parser = argparse.ArgumentParser(description="Create Panda dataframes from " +
                                 ".csv files generated via doh_docker container", 
                                 formatter_class=argparse.RawTextHelpFormatter)
 
