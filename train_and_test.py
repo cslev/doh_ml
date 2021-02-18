@@ -9,14 +9,17 @@ import pandas as pd
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+
 from sklearn import metrics
 
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import f1_score
-from sklearn.metrics import auc
-from matplotlib import pyplot
+from sklearn.metrics import roc_curve, roc_auc_score
+
+
 
 import matplotlib
+from matplotlib import pyplot
 # Force matplotlib to not use any Xwindows backend - otherwise cannot run script in screen, for instance.
 matplotlib.use('Agg')
 
@@ -30,6 +33,8 @@ import shap
 import warnings
 
 
+TEST_SIZE=0.1
+NUM_TREES=300
 
 
 
@@ -37,21 +42,30 @@ LOAD_DATAFRAME_BUILD_FROM_SCRATCH=0
 LOAD_DATAFRAME_FROM_FILE=1
 LOAD_DATAFRAME_SKIP=2
 
-parser = argparse.ArgumentParser(description="Train and test ML model from DoH traces")
+parser = argparse.ArgumentParser(description="Train and test ML model from " +
+                                "DoH traces", formatter_class=argparse.RawTextHelpFormatter)
 
 parser.add_argument('-r',
                     '--raw-traffic-traces',
                     action="store",
                     default="cloudflare",
                     dest="traffic_traces",
-                    help="[TRAINING] Specify here the traffic traces located in /mnt/storage/Doh_traces separated by commas for training. In other words, the traffic traces (i.e., their .csv files) defined here will be iteratively read and used for training one model (Default: cloudflare, i.e., only cloudflare data will be used for training)")
+                    help="[TRAINING] Specify here the traffic traces located " +
+                    "in /mnt/storage/Doh_traces separated by commas for " +
+                    "training. In other words, the traffic traces (i.e., " +
+                    "their .csv files) defined here will be iteratively read " +
+                    "and used for training one model (Default: cloudflare, " +
+                    "i.e., only cloudflare data will be used for training)")
 
 parser.add_argument('-R',
                     '--raw-traffic-traces-root',
                     action="store",
                     default="/mnt/storage/DoH_traces",
                     dest="traffic_traces_root",
-                    help="[TRAINING] Specify here the root directory, where all traffic traces (.csv files) are, each put under a sub-directory used for -r argument (Default: /mnt/storage/Doh_traces)")
+                    help="[TRAINING] Specify here the root directory, where all " +
+                    "traffic traces (.csv files) are, each put under a " +
+                    "sub-directory used for -r argument (Default: " +
+                    "/mnt/storage/Doh_traces)")
 
 
 parser.add_argument('-D',
@@ -59,7 +73,8 @@ parser.add_argument('-D',
                     action="store_true",
                     default=False,
                     dest="load_dataframe",
-                    help="[TRAINING/TESTING]Specify whether dataframe should be loaded from file(Default: False, i.e. generate from raw data)")
+                    help="[TRAINING/TESTING]Specify whether dataframe should be " +
+                    "loaded from file(Default: False, i.e. generate from raw data)")
 
 parser.add_argument('-d',
                     '--dataframe-path',
@@ -67,7 +82,8 @@ parser.add_argument('-d',
                     default="train_df.pkl",
                     type=str,
                     dest="dataframe_path",
-                    help="[TRAINING/TESTING]Specify the full path for the dataframe to load/save (Default: ./train_df.pkl)")
+                    help="[TRAINING/TESTING]Specify the full path for the " +
+                    "dataframe to load/save (Default: ./train_df.pkl)")
 
 
 parser.add_argument('-M',
@@ -75,7 +91,9 @@ parser.add_argument('-M',
                     action="store_true",
                     default=False,
                     dest="load_ml_model",
-                    help="[TRAINING/TESTING] Specify whether the ml-model should be loaded from file (Default:False, i.e., trains a model from scratch)")
+                    help="[TRAINING/TESTING] Specify whether the ml-model " +
+                    "should be loaded from file (Default:False, i.e., trains " +
+                    "a model from scratch)")
 
 parser.add_argument('-m',
                     '--ml-model-path',
@@ -83,7 +101,9 @@ parser.add_argument('-m',
                     default="last_model.pkl",
                     type=str,
                     dest="ml_model_path",
-                    help="[TRAINING/TESTING] Specify the full path for the model to load/save (Default: None, i.e., model will not be saved)")
+                    help="[TRAINING/TESTING] Specify the full path for the " +
+                    "model to load/save (Default: None, i.e., model will " +
+                    "not be saved)")
 
 parser.add_argument('-p',
                     '--pad-packet-len',
@@ -91,33 +111,60 @@ parser.add_argument('-p',
                     default=None,
                     type=int,
                     dest="pad_pkt_len",
-                    help="[TRAINING/TESTING] Specify whether to pad each DoH packet's pkt_len and how (Default: no padding)" +
-                    "1: Pad according to RFC 8467, i.e., to the closest multiple of 128 bytes." +
-                    "2: Pad with a random number between (1,MTU-actual packet size)" +
-                    "3: Pad to a random number from the distribution of the Web packets" +
-                    "4: Pad to a random preceding Web packet's size" +
-                    "5: Pad a sequence of DoH packets to a random sequence of preceeding Web packets' sizes")
+                    help="[TRAINING/TESTING] Specify whether to pad each DoH " +
+                    "packet's pkt_len and how (Default: no padding)\n" +
+                    "1: Pad according to RFC 8467, i.e., to the closest " +
+                    "multiple of 128 bytes.\n" +
+                    "2: Pad with a random number between (1,MTU-actual " +
+                    "packet size)\n" +
+                    "3: Pad to a random number from the distribution of the " +
+                    "Web packets\n" +
+                    "4: Pad to a random preceding Web packet's size\n" +
+                    "5: Pad a sequence of DoH packets to a random sequence of " +
+                    "preceeding Web packets' sizes")
 
 parser.add_argument('-H',
                     '--generate-histogram',
                     action="store_true",
                     default=False,
                     dest="generate_histogram",
-                    help="[TRAINING/TESTING] Specify whether to generate histograms for the datasets used for training (Default: False)")
+                    help="[TRAINING/TESTING] Specify whether to generate " +
+                    "histograms for the datasets used for training (Default: " +
+                    "False)")
 parser.add_argument('-S',
                     '--generate-shapley',
                     action="store_true",
                     default=False,
                     dest="generate_shapley",
-                    help="[TRAINING/TESTING] Specify whether to generate SHAPLEY values after testing (Default: False)")
+                    help="[TRAINING/TESTING] Specify whether to generate " +
+                    "SHAPLEY values after testing (Default: False)")
 
 parser.add_argument('-P',
                     '--generate-prc',
                     action="store_true",
                     default=False,
                     dest="generate_prc",
-                    help="[TRAINING/TESTING] Specify whether to generate PRC curves after testing (Default: False)")
+                    help="[TRAINING/TESTING] Specify whether to generate PRC " +
+                    "curves after testing (Default: False)")
 
+parser.add_argument('-A',
+                    '--generate-roc-auc',
+                    action="store_true",
+                    default=False,
+                    dest="generate_roc_auc",
+                    help="[TRAINING/TESTING] Specify whether to generate ROC " +
+                    "curves after testing (Default: False)")
+
+
+parser.add_argument('-f',
+                    '--max-fpr',
+                    action="store",
+                    default=None,
+                    type=float,
+                    dest="max_fpr",
+                    help="[MISC] Specify here the maximum FPR you want the TPR " +
+                    "to be printed in case of generating an ROC AUC curve. " +
+                    "Use only in conjunction with -R (Default: None)")
 
 
 parser.add_argument('-t',
@@ -126,10 +173,13 @@ parser.add_argument('-t',
                     default=None,
                     type=int,
                     dest="pad_time_lag",
-                    help="[TRAINING/TESTING] Specify whether to pad each DoH packet's time_lag and how (Default: no padding)" +
-                    "3: Pad to a random number from the distribution of the Web packets" +
-                    "4: Pad to a random preceding Web packet's size" +
-                    "5: Pad a sequence of DoH packets to a random sequence of preceeding Web packets' sizes")
+                    help="[TRAINING/TESTING] Specify whether to pad each DoH " +
+                    "packet's time_lag and how (Default: no padding)\n" +
+                    "3: Pad to a random number from the distribution of the " +
+                    "Web packets\n" +
+                    "4: Pad to a random preceding Web packet's size\n" +
+                    "5: Pad a sequence of DoH packets to a random sequence of " +
+                    "preceeding Web packets' sizes")
 
 
 parser.add_argument('-o',
@@ -137,21 +187,31 @@ parser.add_argument('-o',
                     action="store",
                     default=None,
                     dest="open_world_dataframe",
-                    help="[TESTING] Open-world setting: Specify here the path to the data frame you want to use for testing. If no dataframe is avalilable, use -u setting instead to point to the raw files! (Default:None, i.e. Closed-world setting)")
+                    help="[TESTING] Open-world setting: Specify here the path " +
+                    "to the data frame you want to use for testing. If no " +
+                    "dataframe is avalilable, use -u setting instead to point " +
+                    "to the raw files! (Default:None, i.e. Closed-world setting)")
 
 parser.add_argument('-O',
                     '--open-world-raw-data',
                     action="store",
                     default=None,
                     dest="open_world_raw_data",
-                    help="[TESTING] Open-world setting: Specify here the path to the raw data to use for testing. In this case, the raw csv files will be used under the directory specified via this parameter to build the data frame first. If dataframe is avalilable, use -o setting instead! (Default: None, i.e. Closed-world setting)")
+                    help="[TESTING] Open-world setting: Specify here the path " +
+                    "to the raw data to use for testing. In this case, the raw " +
+                    "csv files will be used under the directory specified via " +
+                    "this parameter to build the data frame first. If " +
+                    "dataframe is avalilable, use -o setting instead! " +
+                    "(Default: None, i.e. Closed-world setting)")
 
 parser.add_argument('-C',
                     '--create-dataframe-only',
                     action="store_true",
                     default=False,
                     dest="dataframe_only",
-                    help="[MISC] Set if dataframe creation and saving is needed only! Use only with -d/--dataframe-path to set where to store the dataframe (Default: False)")
+                    help="[MISC] Set if dataframe creation and saving is " +
+                    "needed only! Use only with -d/--dataframe-path to set " +
+                    "where to store the dataframe (Default: False)")
 
 
 
@@ -160,7 +220,9 @@ parser.add_argument('-y',
                     action="store",
                     default="./",
                     dest="output_dir",
-                    help="[MISC] Output directory where histograms, shapley values, PRC curves and accuracy metrics will be saved. (Default: .)")
+                    help="[MISC] Output directory where histograms, shapley " +
+                    "values, PRC curves and accuracy metrics will be saved. " +
+                    "(Default: .)")
 
 parser.add_argument('-c',
                     '--cpu-core-num',
@@ -168,7 +230,8 @@ parser.add_argument('-c',
                     default=1,
                     type=int,
                     dest="cpu_core_num",
-                    help="[MISC] Specify here the number of CPU cores to use for parallel jobs (Default: 1)")
+                    help="[MISC] Specify here the number of CPU cores to use " +
+                    "for parallel jobs (Default: 1)")
 
 parser.add_argument('-j',
                     '--override-meta',
@@ -177,6 +240,17 @@ parser.add_argument('-j',
                     type=str,
                     dest="override_meta",
                     help="[MISC] Specify here any extra metadata (Default: None)")
+
+
+parser.add_argument('-w',
+                    '--write-dataframe-to-csv',
+                    action="store_true",
+                    default=False,
+                    dest="write_dataframe_to_csv",
+                    help="[MISC] Specify here if dataframe is needed to be printed as CSV (Default: False)")
+
+
+
 
 
 args=parser.parse_args()
@@ -199,10 +273,13 @@ if args.dataframe_only and not args.dataframe_path:
 
 # Dataframe related
 LOAD_DATAFRAME=args.load_dataframe
+#LOAD_DATAFRAME=True/False
 if(LOAD_DATAFRAME):
     LOAD_DATAFRAME=LOAD_DATAFRAME_FROM_FILE #we load dataframe from file
+    #LOAD_DATAFRAME=1
 else:
     LOAD_DATAFRAME=LOAD_DATAFRAME_BUILD_FROM_SCRATCH #we build dataframe from scratch
+    #LOAD_DATAFRAME=0
 
 DATAFRAME_NAME_WITH_FULL_PATH=args.dataframe_path
 DATAFRAME_NAME=os.path.basename(DATAFRAME_NAME_WITH_FULL_PATH) #remove path arguments if there is any
@@ -213,7 +290,7 @@ CREATE_DATAFRAME_ONLY=args.dataframe_only
 
 #Model related
 LOAD_MODEL=args.load_ml_model
-MODEL_NAME_WITH_FULL_PATH=args.ml_model_path #remove path arguments if there is any
+MODEL_NAME_WITH_FULL_PATH=args.ml_model_path
 MODEL_NAME=None
 if(MODEL_NAME_WITH_FULL_PATH is not None):
     MODEL_NAME=os.path.basename(args.ml_model_path) #remove path arguments if there is any
@@ -242,9 +319,11 @@ if(OPEN_WORLD is None) and (OPEN_WORLD_RAW_DATA is None):
     CLOSED_WORLD=True
 else:
     CLOSED_WORLD=False
+
     #if it is not close world scenario and we have loaded our model, no need for building any dataframe from scratch for closed-world testing
-    #open world dataframes are anyway built in this case
-    LOAD_DATAFRAME=LOAD_DATAFRAME_SKIP
+    if(LOAD_MODEL):
+        #open world dataframes are anyway built in this case
+        LOAD_DATAFRAME=LOAD_DATAFRAME_SKIP
 
 # DO WE WANT HISTOGRAM?
 HISTOGRAM=args.generate_histogram
@@ -254,6 +333,10 @@ SHAPLEY=args.generate_shapley
 
 # DO WE WANT PRC CURVES?
 PRC=args.generate_prc
+
+# DO WE WANT ROC AUC CURVES?
+ROC_AUC=args.generate_roc_auc
+MAX_FPR=args.max_fpr
 
 OUTPUT_DIR=args.output_dir
 
@@ -268,6 +351,7 @@ OVERRIDE_META = args.override_meta
 META=""
 if (CLOSED_WORLD):
     META = META + "_cw"
+    print("Training - Testing ratio: {} - {}".format((1-TEST_SIZE), TEST_SIZE))
 elif((OPEN_WORLD is not None) and (OPEN_WORLD_RAW_DATA is None)):
     META = META + "_ow_"+os.path.basename(OPEN_WORLD).split(".")[0] #we don't need the trailing file extension
 elif((OPEN_WORLD is None) and (OPEN_WORLD_RAW_DATA is not None)):
@@ -289,6 +373,38 @@ print("METADATA is set as: {}".format(META))
 
 
 
+WRITE_DATAFRAME_TO_CSV = args.write_dataframe_to_csv
+
+
+#------------------------------- CHECKING PATHS ----------------------------
+print("CHECKING GIVEN PATHS...")
+if(not os.path.exists(BASE_PATH_TO_DATASETS)):
+    print("Base path to datasets {} does not exists!".format(BASE_PATH_TODATASETS))
+    print("Exiting...")
+    exit(-1)
+
+if(LOAD_DATAFRAME == LOAD_DATAFRAME_FROM_FILE and not os.path.exists(DATAFRAME_NAME_WITH_FULL_PATH)):
+    print("Dataframe {} to load cannot be found!".format(DATAFRAME_NAME_WITH_FULL_PATH))
+    print("Exiting...")
+    exit(-1)
+if(LOAD_MODEL and not os.path.exists(MODEL_NAME_WITH_FULL_PATH)):
+    print("Model {} to load cannot be found!".format(MODEL_NAME_WITH_FULL_PATH))
+    print("Exiting...")
+    exit(-1)
+if(CLOSED_WORLD == False):
+    if(OPEN_WORLD_RAW_DATA is not None):
+        if(not os.path.exists(OPEN_WORLD_RAW_DATA)):
+            print("Path to open-world raw data {} does not exists!".format(OPEN_WORLD_RAW_DATA))
+            print("Exiting...")
+            exit(-1)
+    if(OPEN_WORLD is not None):
+        if(not os.path.exists(OPEN_WORLD)):
+            print("Path to open-world dataframe {} does not exists!".format(OPEN_WORLD))
+            print("Exiting...")
+            exit(-1)
+print("\t[DONE]")
+
+#===========================================================================
 
 #################################
 # ROGRAM DEFINITIONS START HERE #
@@ -307,7 +423,7 @@ is_http_new = True # for padding techniques  5
 prev_http_packets = [] # for padding techniques 4 and 5
 # for padding techniques 4 and 5
 WEBPACKET_BUFFER_SIZE_PKTLEN = 30 #empirically the best among 5,10,20,30
-WEBPACKET_BUFFER_SIZE_TIMELAG = 50 #empirically the best among 5,10,20,30
+WEBPACKET_BUFFER_SIZE_TIMELAG = 30 #empirically the best among 5,10,20,30
 
 
 #many doh resolvers have /dns-query as a last argument of the POST query
@@ -821,6 +937,12 @@ def _load_all_data(list_of_files_with_explicit_path):
         resolver=resolver_files_tuple[0]
         filenames=resolver_files_tuple[1]
         # print("filenames in _load_all_data:\n{}".format(filenames))
+        if(resolver == ""):
+            #this happens if the given list has accidentally a comma at the end
+            #we need to handle this otherwise the program will crash just at the end :(
+            print("There is an EMPTY resolver in the list...You might have put a ',' accidentally at the end of the list (?)")
+            print("SKIPPING EMPTY resolver...")
+            continue
 
         for i,f in enumerate(filenames):
             print("Processing {}: file #{} out of {} ({})".format(resolver,(i+1), len(filenames), f))
@@ -877,10 +999,22 @@ def train_and_test(dataframe, load_model=LOAD_MODEL):
     dataframe panda.dataframe - Can either be a dataframe or None. If None, it implicitly means OpenWorld scenario and model to be loaded
     load_model Boolean - True if model has to be loaded, False otherwise
     '''
-    print("Training and testing...")
-
 
     if load_model:
+        #splitting dataframe for training and testing
+        if (CLOSED_WORLD == True):
+            #dataframe training and testing dataset is required later for ROC curves
+            df_test = dataframe[['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_pkt_time_lag']]
+            Label=dataframe['Label']
+            x_train, x_test, y_train, y_test = train_test_split(df_test, Label, test_size=TEST_SIZE, random_state=109)
+
+            print("Testing on {}".format(DATAFRAME_NAME))
+        else:
+            if(OPEN_WORLD is not None):
+                print("Testing on {}".format(OPEN_WORLD))
+            else:
+                print("Testing on {}".format(OPEN_WORLD_RAW_DATA))
+
         print("Loading model from {}".format(MODEL_NAME_WITH_FULL_PATH))
         try:
             rfc=joblib.load(MODEL_NAME_WITH_FULL_PATH)
@@ -891,19 +1025,22 @@ def train_and_test(dataframe, load_model=LOAD_MODEL):
             # print("Let's retrain from scratch...")
             # #call recursively this same function by explicitly branching to the else branch
             # train_and_test(dataframe, False)
+
+
     else:
-        if(dataframe is None): #SHOULD NEVER HAPPEN, BUT LET'S CHECK
-            print("Dataframe is None, however it is set to load one or build one from scratch")
-            print("UNRESOLVED ERROR....EXITING")
-            exit(-1)
+    #     print("Training and testing...")
+    #     if(dataframe is None): #SHOULD NEVER HAPPEN, BUT LET'S CHECK
+    #         print("Dataframe is None, however it is set to load one or build one from scratch")
+    #         print("UNRESOLVED ERROR....EXITING")
+    #         exit(-1)
 
         #splitting dataframe for training and testing
         df_test = dataframe[['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_pkt_time_lag']]
         Label=dataframe['Label']
-        x_train, x_test, y_train, y_test = train_test_split(df_test, Label, test_size=0.1, random_state=109)
+        x_train, x_test, y_train, y_test = train_test_split(df_test, Label, test_size=TEST_SIZE, random_state=109)
 
         #training
-        rfc = RandomForestClassifier(n_estimators = 300, criterion="entropy", verbose=2, n_jobs=CPU_CORES)
+        rfc = RandomForestClassifier(n_estimators = NUM_TREES, criterion="entropy", verbose=2, n_jobs=CPU_CORES)
         rfc.fit(x_train,y_train)
 
         if(MODEL_NAME_WITH_FULL_PATH is not None):
@@ -939,6 +1076,10 @@ def train_and_test(dataframe, load_model=LOAD_MODEL):
         print("Recall:",metrics.recall_score(y_test, rfc_pred))
         print("F1 Score:",metrics.f1_score(y_test,rfc_pred ))
         print("Confusion Matrix :\n" ,metrics.confusion_matrix(y_test,rfc_pred))
+
+        # print("Metrics:")
+        # for i in metrics:
+        #     print(i)
 
         f.write("+=======================+\n")
         f.write("| CLOSED WORLD SETTINGS |\n")
@@ -1066,6 +1207,39 @@ def generate_histogram(dataframe, bin_start, bin_stop, bin_step, column_name, fi
     pyplot.savefig(OUTPUT_DIR+"/"+filename_base+".pdf")
     pyplot.savefig(OUTPUT_DIR+"/"+filename_base+".png")
 
+def generate_roc_auc_csv(df_test, Label, model, resolver=RESOLVERS_FOR_TRAINING[0], basename="ROC_AUC_"+META, max_fpr=None):
+
+    lr_probs = model.predict_proba(df_test)
+    if max_fpr is None:
+        print("ROC score (partial AUC): {}".format(roc_auc_score(Label, lr_probs[:,1],max_fpr=max_fpr)))
+    else:
+        print("ROC score (for max FPR {}): {}".format(max_fpr, roc_auc_score(Label, lr_probs[:,1],max_fpr=max_fpr)))
+
+    fpr, tpr, _ = roc_curve(Label, lr_probs[:,1])
+
+    basename=OUTPUT_DIR + "/" +basename
+    csv_file  = basename + ".csv"
+    plot_file = basename + ".pdf"
+    plot_file_png = basename + ".png"
+    plot_label = resolver
+
+
+    #CSV file
+    roc_df = pd.DataFrame({'fpr' : fpr, 'tpr':tpr})
+    roc_df.to_csv(csv_file, index_label='index')
+
+    pyplot.clf()
+    fig=pyplot.figure()
+    pyplot.plot(fpr,tpr, color='navy', lw=2, linestyle='--', label='ROC AUC')
+    pyplot.xlim([0.0, 1.0])
+    pyplot.ylim([0.0, 1.05])
+    pyplot.xlabel('False Positive Rate')
+    pyplot.ylabel('True Positive Rate')
+    pyplot.title('Receiver operating characteristic')
+    pyplot.legend(loc="lower right")
+    pyplot.savefig(plot_file)
+    pyplot.savefig(plot_file_png)
+
 def generate_pr_csv(df_test, Label, model, resolver=RESOLVERS_FOR_TRAINING[0], basename="PRC_"+META):
     """
     @params
@@ -1117,7 +1291,11 @@ if CREATE_DATAFRAME_ONLY:
     print("There is nothing else to do for now...EXITING")
     exit(0)
 
-
+if(WRITE_DATAFRAME_TO_CSV):
+    print("Saving dataframe as csv file ({}). Note, Label=1 means DoH".format(str(OUTPUT_DIR+"/"+DATAFRAME_NAME+".csv")))
+    df_to_write=dataframe[['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_pkt_time_lag', 'Label']]
+    df_to_write.to_csv(OUTPUT_DIR + "/" + DATAFRAME_NAME+".csv",index_label='index')
+    print("[DONE]")
 # TRAIN AND TEST
 results=train_and_test(dataframe, LOAD_MODEL)
 model=results["model"]
@@ -1126,8 +1304,8 @@ y_test=results["y_test"]
 if(CLOSED_WORLD == False):
     open_world_dataframe = results["open_world_dataframe"]
     open_world_dataframe_name = results["open_world_dataframe_name"]
-# print(x_test)
-# print(y_test)
+else:
+    print("Training - Testing ratio: {} - {}".format((1-TEST_SIZE), TEST_SIZE))
 
 if(HISTOGRAM):
     if(dataframe is None): #this case, no dataframe was loaded for training, so no histogram can be made
@@ -1157,6 +1335,14 @@ if(PRC):
         resolver=os.path.basename(OPEN_WORLD)
     generate_pr_csv(df_test=x_test,Label=y_test, model=model, resolver="",basename=basename)
 
+if(ROC_AUC):
+    # CREATE PRC CURVES
+    print("Generating ROC curve")
+    if(dataframe is not None): #there was dataframe created/loaded
+        basename="ROC_AUC_"+DATAFRAME_NAME+META
+    else: #there was NO dataframe created/loaded so use model name instead
+        basename="ROC_AUC_"+MODEL_NAME+META
+    generate_roc_auc_csv(df_test=x_test,Label=y_test, model=model, resolver="",basename=basename, max_fpr=MAX_FPR)
 
 if(SHAPLEY):
     # CREATE SHAP VALUES
