@@ -20,8 +20,8 @@ from sklearn.metrics import auc
 
 
 
-# import joblib
-import pickle
+import joblib
+# import pickle
 import random
 import math
 
@@ -29,6 +29,8 @@ import math
 #SHAP values
 import shap
 import warnings
+
+import analysis as analysis
 
 parser = argparse.ArgumentParser(description="This script is for training a " + 
                                 "model from DoH traces and test it right away " + 
@@ -65,6 +67,14 @@ parser.add_argument('-f',
                     "This should not contain the 'Label' (y).\n" +
                     "Default: pkt_len, prev_pkt_len, time_lag, prev_time_lag")
 
+parser.add_argument('-o',
+                    '--output',
+                    action="store",
+                    type=str,
+                    dest="output",
+                    default="output_",
+                    help="Specify output basename used for PRC, shapley, etc.")   
+
 parser.add_argument('-S',
                     '--generate-shapley',
                     action="store_true",
@@ -79,6 +89,14 @@ parser.add_argument('-P',
                     default=False,
                     dest="generate_prc",
                     help="Specify whether to generate PRC " +
+                    "curves after testing (Default: False)")
+
+parser.add_argument('-A',
+                    '--generate-roc-auc',
+                    action="store_true",
+                    default=False,
+                    dest="generate_roc_auc",
+                    help="Specify whether to generate ROC " +
                     "curves after testing (Default: False)")
 
 parser.add_argument('-c',
@@ -128,11 +146,21 @@ SHAPLEY=args.generate_shapley
 # DO WE WANT PRC CURVES?
 PRC=args.generate_prc
 
+# DO WE WANT ROC AUC CURVE?
+ROC_AUC = args.generate_roc_auc
+
+# WE NEED A BASE OUTPUT NAME FOR THE ABOVE THREE FUNCTIONS
+OUTPUT = args.output
+
+
 # CPU cores to use
 CPU_CORES=args.cpu_core_num
 
+
+
 # DO WE WANT CROSS-VALIDATION
 CROSS_VALIDATION = args.cross_validation
+
 
 
 logger.log_simple("INPUT DATA",logger.TITLE_OPEN)
@@ -240,12 +268,22 @@ else:
 
 logger.log_simple("END CLOSED WORLD SETTING",logger.TITLE_CLOSE)
 
+
+if(SHAPLEY):
+  analysis.make_shap(rfc, dataframe, OUTPUT, FEATURES)
+if PRC:
+  analysis.generate_pr_csv(rfc, dataframe, OUTPUT, FEATURES)
+if ROC_AUC:
+  analysis.generate_roc_auc_csv(rfc, dataframe, OUTPUT, FEATURES)
+
+
+
 # SAVING MODEL
 logger.log("Saving the model to {}".format(ML_MODEL_PATH))
 try:
-  # joblib.dump(rfc, ML_MODEL_PATH, compress=('xz',3)) #compress with xz with compression level 3
-  ml_model_file = open(ML_MODEL_PATH, 'wb')
-  pickle.dump(rfc, ml_model_file)
+  joblib.dump(rfc, ML_MODEL_PATH, compress=('xz',3)) #compress with xz with compression level 3
+  # ml_model_file = open(ML_MODEL_PATH, 'wb')
+  # pickle.dump(rfc, ml_model_file)
   logger.log("Saving the model to {}".format(ML_MODEL_PATH), logger.OK)
 except OSError as e:
   logger.log("Saving the model to {}".format(ML_MODEL_PATH), logger.FAIL)
@@ -257,3 +295,6 @@ except OSError as e:
   except:
     logger.log("Removing any residual...",logger.FAIL)
     logger.log_simple("Could not remove the half-ready model! Delete manually!")
+
+
+

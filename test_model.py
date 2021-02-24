@@ -31,9 +31,9 @@ import math
 import sys
 
 
-#SHAP values
-import shap
-import warnings
+
+
+import analysis as analysis
 
 parser = argparse.ArgumentParser(description="This script is for loading a " + 
                                 "trained model from a file and test it with a "+
@@ -63,7 +63,7 @@ parser.add_argument('-o',
                     action="store",
                     type=str,
                     dest="output",
-                    required=True,
+                    default="output_",
                     help="Specify output basename used for PRC, shapley, etc.")   
 
 parser.add_argument('-f',
@@ -141,20 +141,20 @@ def load_source(path, label):
   '''
   Load any pickle object and return it.
   path str - the path to the file
-  label str - for prettifying output and make output messages meaningful
+  label str - if label=model joblib is used to load model file, 
+              otherwise pickle is used to load dataframe
   '''
-  logger.log("Loading for {} {}...".format(label, path))
+  
   if(os.path.isfile(path)):
     try:
+      logger.log("Loading {} from {}...".format(label, path))
       if label == "model":
         retval=joblib.load(path)
       else:
         retval=pd.read_pickle(path)
-      logger.log("Loading for {} {}...".format(label,path), 
-                  logger.OK)
+      logger.log("Loading {} from {}...".format(label, path),logger.OK)
     except:
-      logger.log("Loading for {} {}...".format(label,path), 
-                  logger.FAIL)
+      logger.log("Loading {} from {}...".format(label, path), logger.FAIL)
       logger.log_simple("Something happened during reading {}".format(label))
       logger.log_simple(sys.exc_info()[0])
       logger.log_simple("Exiting...")
@@ -197,119 +197,6 @@ def test_model(model, data):
 
   logger.log_simple("OPEN-WORLD SETTINGS", logger.TITLE_CLOSE)
 
-def make_shap(model, dataframe, basename):
-  '''
-  Create shapley values for the model given.
-  model Model - the model itself
-  dataframe Dataframe - the data to work on
-  basename str - for storing the plots
-  '''
-
-  X = dataframe[FEATURES]
-  y = dataframe["Label"]
-
-  explainer = shap.TreeExplainer(model)
-  select = range(5)
-  pyplot.clf()
-  features = X.iloc[select]
-  # print(features)
-  # features_display = X.loc[features.index]
-  # print(features_display)
-  # labels = y.iloc[select]
-  # print(labels)
-  with warnings.catch_warnings() :
-      warnings.simplefilter("ignore")
-      shap_values = explainer.shap_values(features)[1]
-      shap_interaction_values = explainer.shap_interaction_values(features)
-  # shap_values = explainer.shap_values(x_train)
-  # #shap.force_plot(explainer.expected_value, shap_values[0], features=x_train.loc[0,:], feature_names=x_train.columns)
-  if isinstance(shap_interaction_values, list):
-      shap_interaction_values = shap_interaction_values[1]
-  shap.summary_plot(shap_values, features, plot_type="bar", show=False)
- 
-  pyplot.savefig(basename+".shapley.pdf")
-  pyplot.savefig(basename+".shapley.png")
-
-def generate_roc_auc_csv(model, dataframe, basename, max_fpr=None):
-  '''
-  Generate ROC AUC curve
-  model Model - the model itself
-  dataframe Dataframe - the data used for testing as a dataframe
-  basename Str - for storing the plots
-  max_fpr float - define max_fpr for the ROC AUC curve 
-  '''
-  X = dataframe[FEATURES]
-  y = dataframe["Label"]
-
-  lr_probs = model.predict_proba(X)
-  if max_fpr is None:
-      print("ROC score (partial AUC): {}".format(roc_auc_score(y, lr_probs[:,1],max_fpr=max_fpr)))
-  else:
-      print("ROC score (for max FPR {}): {}".format(max_fpr, roc_auc_score(y, lr_probs[:,1],max_fpr=max_fpr)))
-
-  fpr, tpr, _ = roc_curve(y, lr_probs[:,1])
-
-  basename+="ROC_AUC_"
-  csv_file  = basename + ".csv"
-  plot_file = basename + ".pdf"
-  plot_file_png = basename + ".png"
-  plot_label = "" #define here any label to add to the plot
-
-
-  #CSV file
-  roc_df = pd.DataFrame({'fpr' : fpr, 'tpr':tpr})
-  roc_df.to_csv(csv_file, index_label='index')
-
-  pyplot.clf()
-  fig=pyplot.figure()
-  pyplot.plot(fpr,tpr, color='navy', lw=2, linestyle='--', label='ROC AUC')
-  pyplot.xlim([0.0, 1.0])
-  pyplot.ylim([0.0, 1.05])
-  pyplot.xlabel('False Positive Rate')
-  pyplot.ylabel('True Positive Rate')
-  pyplot.title('Receiver operating characteristic')
-  pyplot.legend(loc="lower right")
-  pyplot.savefig(plot_file)
-  pyplot.savefig(plot_file_png)
-
-def generate_pr_csv(model, dataframe, basename):
-  """
-  Generate precision-recall curve values
-  model Model - the model itself
-  dataframe Dataframe - the data used for testing as a dataframe
-  basename Str - for storing the plots
-  """
-  X = dataframe[FEATURES]
-  y = dataframe["Label"]
-
-  lr_probs = model.predict_proba(X)
-  # print("lr_probs:{}".format(lr_probs))
-  lr_probs = lr_probs[:, 1]
-  # print("lr_probs[:, 1]:{}".format(lr_probs))
-  lr_precision, lr_recall, threshold = precision_recall_curve(y, lr_probs)
-
-  basename+="PRC_"
-  csv_file  = basename + ".csv"
-  plot_file = basename + ".pdf"
-  plot_file_png = basename + ".png"
-  plot_label = "" #define here any extra label to add to the plot
-
-  # print("Threshold for PRC: {}".format(threshold))
-  prc_df = pd.DataFrame({'precision' : lr_precision, 'recall':lr_recall})
-  prc_df.to_csv(csv_file, index_label='index')
-
-  pyplot.clf()
-  fig=pyplot.figure()
-  pyplot.rcParams["figure.figsize"]=5,5
-  no_skill = len(y[y==1]) / len(y)
-  pyplot.plot([0, 1], [no_skill, no_skill], linestyle='--', label='No Skill')
-  pyplot.plot(lr_recall, lr_precision, marker='.', label=plot_label)
-  pyplot.xlabel('Recall')
-  pyplot.ylabel('Precision')
-  pyplot.legend()
-  pyplot.savefig(plot_file)
-  pyplot.savefig(plot_file_png)
-
 
 logger.log_simple("INPUT DATA",logger.TITLE_OPEN)
 ### LOADING DATAFRAME
@@ -325,8 +212,8 @@ logger.log_simple("Features used for testing: {}".format(FEATURES))
 test_model(rfc,dataframe)
 
 if(SHAPLEY):
-  make_shap(rfc, dataframe, OUTPUT)
+  analysis.make_shap(rfc, dataframe, OUTPUT, FEATURES)
 if PRC:
-  generate_pr_csv(rfc, dataframe, OUTPUT)
+  analysis.generate_pr_csv(rfc, dataframe, OUTPUT, FEATURES)
 if ROC_AUC:
-  generate_roc_auc_csv(rfc, dataframe, OUTPUT)
+  analysis.generate_roc_auc_csv(rfc, dataframe, OUTPUT, FEATURES)

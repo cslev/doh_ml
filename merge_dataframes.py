@@ -18,8 +18,8 @@ parser = argparse.ArgumentParser(description="Merge Panda dataframes for doh_ml.
                                 formatter_class=argparse.RawTextHelpFormatter)
 
 
-parser.add_argument('-m',
-                    '--merge',
+parser.add_argument('-i',
+                    '--input',
                     action="store",
                     metavar='N',
                     # default="./data_raw/cloudflare/*",
