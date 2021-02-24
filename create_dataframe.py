@@ -70,6 +70,13 @@ parser.add_argument('-t',
                     "4: Pad to a random preceding Web packet's size\n" +
                     "5: Pad a sequence of DoH packets to a random sequence of preceeding Web packets' sizes\n")
 
+parser.add_argument('-b',
+                    '--bidir',
+                    action="store_true",
+                    dest='bidir',
+                    default=False,
+                    help="Specify if dataframe should be bidirectional. \n" +
+                    "Default: False (only requests will be present")
 
 parser.add_argument('-o',
                     '--output',
@@ -112,6 +119,8 @@ for i in range(1,12):
 RFC_PADDING[12] = 1500
 RANDOM_VALUE_NORMAL_DISTRIBUTION_COUNTER = 5
 
+#Packets are still bidirectional in the dataframe?
+BIDIR=args.bidir
 
 
 SELF="create_dataframe.py"
@@ -497,7 +506,7 @@ def pad_feature_values(df_temp, pkt_len=False, time_lag=False):
     logger.log_simple(" ---> DoH pkt_len_mean:  {}".format(doh.pkt_len.mean()))
     logger.log_simple(" ---> DoH pkt_len_stdev: {}".format(doh.pkt_len.std()))
   else:
-    logger.log("Padding pkt_len values with technique {}...".format(pkt_len), logger.OK)
+    logger.log("Padding pkt_len values...", logger.SKIP)
 
   # print(df_temp)
   if(time_lag):
@@ -528,7 +537,7 @@ def pad_feature_values(df_temp, pkt_len=False, time_lag=False):
     logger.log_simple(" ---> DoH time_lag_mean:  {}".format(doh.time_lag.mean()))
     logger.log_simple(" ---> DoH time_lag_stdev: {}".format(doh.time_lag.std()))
   else:
-    logger.log("Padding time_lag values with technique {}...".format(time_lag), logger.SKIP)
+    logger.log("Padding time_lag values...", logger.SKIP)
 
   return df_temp
 
@@ -1176,9 +1185,9 @@ def create_dataframe():
   logger.log("Dropping non-Web and non-DoH packets...",logger.OK)
 
   #replace labels with 0 (for Web) and 1 (for DoH)
-  logger.log("Relabeling packets with a new column 'Label'...")
+  logger.log("Relabeling packets with a new column 'Label' (0 - Web, 1 - DoH)...")
   dataframe=add_label(dataframe)
-  logger.log("Relabeling packets with a new column 'Label'...",logger.OK)
+  logger.log("Relabeling packets with a new column 'Label' (0 - Web, 1 - DoH)...",logger.OK)
 
   #add direction column
   logger.log("Adding direction to packets based on the IP...")
@@ -1187,9 +1196,11 @@ def create_dataframe():
 
   #remove responses according to the direction
   logger.log("Remove response packets according to direction...")
-  dataframe=dataframe[dataframe['direction']=='request']
-  logger.log("Remove response packets according to direction...",logger.OK)
-  
+  if not BIDIR:
+    dataframe=dataframe[dataframe['direction']=='request']
+    logger.log("Remove response packets according to direction...",logger.OK)
+  else: 
+    logger.log("Remove response packets according to direction...",logger.SKIP)
 
   #update labels according to whether the corresponding flow is DoH 
   dataframe=relabel_outlier_flows(dataframe)
