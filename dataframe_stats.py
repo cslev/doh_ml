@@ -35,12 +35,20 @@ parser.add_argument('-i',
                     dest="dataframe_path",
                     help="Specify here the path to the dataframe")
 
+# parser.add_argument('-o',
+#                     '--output',
+#                     action="store",
+#                     type=str,
+#                     dest="output",
+#                     default="output_",
+#                     help="Specify output basename used for boxplots, etc.") 
+
 parser.add_argument('-H',
                     '--generate-histogram',
                     action="store_true",
                     default=False,
                     dest="generate_histogram",
-                    help="[TRAINING/TESTING] Specify whether to generate " +
+                    help="Specify whether to generate " +
                     "histograms for the datasets used for training (Default: " +
                     "False)")
 
@@ -55,15 +63,43 @@ parser.add_argument('-f',
                     help="Specify the list of features to describe. \n" +
                     "Default: pkt_len, prev_pkt_len, time_lag, prev_time_lag")
 
+parser.add_argument('-b',
+                    '--bidir',
+                    action="store_true",
+                    dest='bidir',
+                    default=False,
+                    help="Specify if dataframe is bidirectional. \n" +
+                    "Default: False")
+
+parser.add_argument('-B',
+                    '--boxplot',
+                    action="store_true",
+                    dest='boxplot',
+                    default=False,
+                    help="Specify if boxplots are needed. \n" +
+                    "Default: False")
+
+
 #for BASH autocomplete  
 argcomplete.autocomplete(parser)
 
 args=parser.parse_args()
 DATAFRAME_PATH=args.dataframe_path
 DATAFRAME_NAME=os.path.basename(DATAFRAME_PATH).split(".")[0]
+
+#we don't need OUTPUT as we have the DATAFRAME_NAME as a basename
+# OUTPUT = args.output
+
+
 # DO WE WANT HISTOGRAM?
 HISTOGRAM=args.generate_histogram
 HISTOGRAM_PATH="histograms/"
+
+#Packets are still bidirectional in the dataframe?
+BIDIR=args.bidir
+
+#Boxplots?
+BOXPLOT=args.boxplot
 
 #instantiate logger class
 logger = Logger(SELF)
@@ -135,6 +171,84 @@ def generate_histogram(dataframe, bin_start, bin_stop, bin_step, column_name, fi
   pyplot.savefig(HISTOGRAM_PATH+filename_base+".png")
   logger.log(str("Generating histogram {}...".format(column_name)),logger.OK)
   
+def generate_boxplot(doh_req,web_req, doh_resp=None,web_resp=None):
+  '''
+  Generate boxplot for a given feature for the four different types of traffic.
+  @params
+  doh_req: DoH requests
+  web_req: Web requests
+  doh_resp: DoH responses (default None as bidir is not set by default)
+  web_resp: Web responses (default None as bidir is not set by default)
+  '''
+  if ((doh_resp is not None) and (web_resp is not None)):
+    pkt_len = [ doh_req['pkt_len'], 
+                web_req['pkt_len'], 
+                doh_resp['pkt_len'],
+                web_resp['pkt_len']  
+              ]
+    prev_pkt_len =  [ doh_req['prev_pkt_len'],
+                      web_req['prev_pkt_len'],
+                      doh_resp['prev_pkt_len'],
+                      web_resp['prev_pkt_len']
+                    ]
+    time_lag =  [ doh_req['time_lag'],
+                  web_req['time_lag'],
+                  doh_resp['time_lag'],
+                  web_resp['time_lag']
+                ]
+    prev_time_lag = [ doh_req['prev_time_lag'],
+                      web_req['prev_time_lag'],
+                      doh_resp['prev_time_lag'],
+                      web_resp['prev_time_lag']
+                    ]
+  else:
+    pkt_len = [ doh_req['pkt_len'], 
+                web_req['pkt_len']
+              ]
+    prev_pkt_len =  [ doh_req['prev_pkt_len'],
+                      web_req['prev_pkt_len'],
+                    ]
+    time_lag =  [ doh_req['time_lag'],
+                  web_req['time_lag'],
+                ]
+    prev_time_lag = [ doh_req['prev_time_lag'],
+                      web_req['prev_time_lag'],
+                    ]
+  LS=12
+  TS=LS+4
+  fig, ax = pyplot.subplots()
+  ax.boxplot(pkt_len, showfliers=False)
+  ax.set_xticklabels(['DoH req.', 'Web req.', 'DoH resp.', 'Web resp.'])
+  ax.set_xlabel("Different types of packets", size=TS)
+  ax.tick_params(labelsize = LS)
+  ax.set_ylabel('Size [B]', size=TS)
+  pyplot.savefig("boxplot_"+DATAFRAME_NAME+"_pkt_len.pdf", bbox_inches='tight')
+
+  fig, ax = pyplot.subplots()
+  ax.boxplot(prev_pkt_len, showfliers=False)
+  ax.set_xticklabels(['DoH req.', 'Web req.', 'DoH resp.', 'Web resp.'])
+  ax.set_xlabel("Different types of packets", size=TS)
+  ax.tick_params(labelsize = LS)
+  ax.set_ylabel('Size [B]', size=TS)
+  pyplot.savefig("boxplot_"+DATAFRAME_NAME+"_prev_pkt_len.pdf", bbox_inches='tight')
+
+  fig, ax = pyplot.subplots()
+  ax.boxplot(time_lag, showfliers=False)
+  ax.set_xticklabels(['DoH req.', 'Web req.', 'DoH resp.', 'Web resp.'])
+  ax.set_xlabel("Different types of packets", size=TS)
+  ax.tick_params(labelsize = LS)
+  ax.set_ylabel('Time lag [s]', size=TS)
+  pyplot.savefig("boxplot_"+DATAFRAME_NAME+"_time_lag.pdf", bbox_inches='tight')
+
+  fig, ax = pyplot.subplots()
+  ax.boxplot(prev_time_lag, showfliers=False)
+  ax.set_xticklabels(['DoH req.', 'Web req.', 'DoH resp.', 'Web resp.'])
+  ax.set_xlabel("Different types of packets", size=TS)
+  ax.tick_params(labelsize = LS)
+  ax.set_ylabel('Time lag [s]', size=TS)
+  pyplot.savefig("boxplot_"+DATAFRAME_NAME+"_prev_time_lag.pdf", bbox_inches='tight')
+
+
 
 
 #loading dataframe
@@ -146,8 +260,21 @@ logger.log_simple("END COLUMNS", logger.TITLE_CLOSE)
 
 logger.log_simple("STATISTICS", logger.TITLE_OPEN)
 sum = len(dataframe)
-doh = len(dataframe[dataframe["Label"]==1])
-web = len(dataframe[dataframe["Label"]==0])
+
+doh_packets = dataframe[dataframe["Label"]==1]
+# print(doh_packets)
+doh = len(doh_packets)
+
+web_packets = dataframe[dataframe["Label"]==0]
+web = len(web_packets)
+
+#if bidirectional dataframe is supposed to be loaded
+if BIDIR:
+  doh_requests  = doh_packets[doh_packets["direction"]=="request"]
+  doh_responses = doh_packets[doh_packets["direction"]=="response"]
+  web_requests  = web_packets[web_packets["direction"]=="request"]
+  web_responses = web_packets[web_packets["direction"]=="response"]
+
 logger.log_simple("Number of packets: {}".format(sum))
 logger.log_simple("Number of DoH packets: {} ({:.2f}%)".format(doh, doh/sum*100))
 logger.log_simple("Number of Web packets: {} ({:.2f}%)".format(web, web/sum*100))
@@ -159,6 +286,45 @@ for f in FEATURES:
     logger.log_simple("Feature {} is not present in the dataset...SKIPPING".format(f))
 
 logger.log_simple("End Describing packets", logger.TITLE_CLOSE)
+
+if BIDIR:
+  logger.log_simple("Describing DoH requests", logger.TITLE_OPEN)
+  for f in FEATURES:
+    try:
+      logger.log_simple("{}".format(doh_requests[[f]].describe()))
+    except:
+      logger.log_simple("Feature {} is not present in the dataset...SKIPPING".format(f))
+
+  logger.log_simple("End Describing DoH requests", logger.TITLE_CLOSE)
+
+  logger.log_simple("Describing DoH responses", logger.TITLE_OPEN)
+  for f in FEATURES:
+    try:
+      logger.log_simple("{}".format(doh_responses[[f]].describe()))
+    except:
+      logger.log_simple("Feature {} is not present in the dataset...SKIPPING".format(f))
+
+  logger.log_simple("End Describing DoH responses", logger.TITLE_CLOSE)
+
+  logger.log_simple("Describing Web requests", logger.TITLE_OPEN)
+  for f in FEATURES:
+    try:
+      logger.log_simple("{}".format(web_requests[[f]].describe()))
+    except:
+      logger.log_simple("Feature {} is not present in the dataset...SKIPPING".format(f))
+
+  logger.log_simple("End Describing Web requests", logger.TITLE_CLOSE)
+
+
+  logger.log_simple("Describing Web responses", logger.TITLE_OPEN)
+  for f in FEATURES:
+    try:
+      logger.log_simple("{}".format(web_responses[[f]].describe()))
+    except:
+      logger.log_simple("Feature {} is not present in the dataset...SKIPPING".format(f))
+
+  logger.log_simple("End Describing Web responses", logger.TITLE_CLOSE)
+
 logger.log_simple("END STATISITCS", logger.TITLE_CLOSE)
 
 if(HISTOGRAM):
@@ -204,3 +370,6 @@ if(HISTOGRAM):
                       "Time lag [s]")
 
   logger.log_simple("END HISTOGRAMS", logger.TITLE_CLOSE)
+
+if (BOXPLOT):
+  generate_boxplot(doh_requests,web_requests, doh_resp=doh_responses,web_resp=web_responses)
