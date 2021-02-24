@@ -44,7 +44,7 @@ class Logger(object):
           self.FAIL:BRED, 
           self.WARN:BYELLOW, 
           self.FOUND:GREEN,
-          self.SKIP:ITALIC
+          self.SKIP:BCYAN
           }
     self.STATUS_MSG = {
                   self.OK:    self.STATUS[self.OK]    + "[DONE]"+RESET,
