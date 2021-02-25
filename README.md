@@ -291,7 +291,7 @@ test_model.py -| F1 Score:  0.9981347150259068
 test_model.py -| Confusion Matrix :
 [[29712   170]
  [    1 45752]]
-test_model.py -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+test_model.py -| Again, the features used for testing: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
 ...
 
 ```
