@@ -43,6 +43,8 @@ optional arguments:
                         3: Pad to a random number from the distribution of the Web packets
                         4: Pad to a random preceding Web packet's size
                         5: Pad a sequence of DoH packets to a random sequence of preceeding Web packets' sizes
+  -b, --bidir           Specify if dataframe should be bidirectional. 
+                        Default: False (only requests will be present
   -o DATAFRAME_PATH, --output DATAFRAME_PATH
                         Specify the full path for the dataframe to be saved (Default: ./dataframes/df.pkl)
 ```
@@ -51,6 +53,54 @@ To create a simple dataframe from the example data provided, just issue the foll
 ```
 python3 create_dataframe.py -i csvfile-1-200.csv -o df.pkl
 ```
+### Troubleshooting
+It can happen that the .csv files gathered via the [containers](https://github.com/cslev/doh_docker) contain malformed data. In this case, the `create_dataframe.py` scripts raises an error like this:
+```
+Traceback (most recent call last): data_raw/SG/comcast/csvfile-3801-4000.csv...
+  File "create_dataframe.py", line 1254, in <module>
+    create_dataframe()
+  File "create_dataframe.py", line 1153, in create_dataframe
+    df_tmp = load_csvfile(f)
+  File "create_dataframe.py", line 566, in load_csvfile
+    df = pd.read_csv(filename, header=0, names=list(rename_table.keys()))
+  File "/usr/lib/python3/dist-packages/pandas/io/parsers.py", line 678, in parser_f
+    return _read(filepath_or_buffer, kwds)
+  File "/usr/lib/python3/dist-packages/pandas/io/parsers.py", line 446, in _read
+    data = parser.read(nrows)
+  File "/usr/lib/python3/dist-packages/pandas/io/parsers.py", line 1036, in read
+    ret = self._engine.read(nrows)
+  File "/usr/lib/python3/dist-packages/pandas/io/parsers.py", line 1848, in read
+    data = self._reader.read(nrows)
+  File "pandas/_libs/parsers.pyx", line 876, in pandas._libs.parsers.TextReader.read
+  File "pandas/_libs/parsers.pyx", line 891, in pandas._libs.parsers.TextReader._read_low_memory
+  File "pandas/_libs/parsers.pyx", line 945, in pandas._libs.parsers.TextReader._read_rows
+  File "pandas/_libs/parsers.pyx", line 932, in pandas._libs.parsers.TextReader._tokenize_rows
+  File "pandas/_libs/parsers.pyx", line 2112, in pandas._libs.parsers.raise_parser_error
+pandas.errors.ParserError: Error tokenizing data. C error: Expected 9 fields in line 85750, saw 10
+```
+This actually happens because in some payloads there are non-UTF-8 characters and also quite random double-quotes (") that breaks the dataframe creation.
+The easiest way to resolve this issue is to remove those packets from the .csv files manually. They are anyway for the _response_ packets only.
+
+An automated way to do this is to look for the pattern of the malformed payloads. 
+
+They look like this:
+```
+"447505","3016.434045","14.0.41.112","172.25.0.2","443","35290","HTTP2","1434","HEADERS[29]: 200 OK, DATA[29]Standard query 0xffe0 URI <Root> Unknown (65499) <Root> Unknown (2054) <Root> Unknown (529) \005\b\a\a\a\t.\b\n\f\024\r\f\v\v\f.\022\023\017\024\035\032\037\036\035\032\034\034 $.' ",#\034\034(7).01444\037'9=82<.342��\000C\001\t\t\t\f\v\f\030\r\r\0302!\034!222222222.2222222222222222222222222222222222222222��\000\021\b\000P\000�\003." Unused \001��\000\037\000\000\001\005\001\001\001\001\001\001\000\000 Unknown (258) <Root> Unknown (22617) <Unknown extended label>[Malformed Packet]"
+
+or
+
+"163470","1116.779482","23.60.171.249","172.25.0.2","443","38722","DNS","1431","Unknown operation (9) 0x4632 Unused <Root> Unused \000\0000�\000\0023�\000\000\000\000\000\000\000\000\000\000\000\000 Unused <Root>[Malformed Packet], HEADERS[65]: 200 OK, DATA[65]"
+```
+So, the pattern is `<Root> Un`. 
+
+We have to remove these lines from the file, store them in new .csv files and then rename the new files back to the old ones as the script requires them to have the original naming convention. 
+
+To do this, you can do this:
+```
+cd PATH/TO/CSV/FILES
+for i in $(ls *csv);do echo $i; wc -l $i;cat $i|grep -v "<Root> Un" > "${i}_new.csv"; wc -l "${i}_new.csv";rm -rf $i; mv ${i}_new.csv $i;done
+```
+This hacky script will also shows how many lines have been removed. More precisely, it shows you the line counts for all files, and you can see how many lines have been removed.
 
 ## `merge_dataframe.py`
 ```
@@ -70,6 +120,7 @@ python3 merge_dataframe.py -m df.pkl df2.pkl df3.pkl -o combined_df.pkl
 ```
 
 ## `dataframe_stats.py`
+This is for generating stats for the dataframes. The below script can also make boxplots for the DoH and Web packets if requested to see their statistical data in a graphical way.
 ```
 Brief analysis of dataframes created via 'create_dataframe.py'.csv files generated via doh_docker container
 
@@ -82,11 +133,14 @@ optional arguments:
   -f N [N ...], --features N [N ...]
                         Specify the list of features to describe. 
                         Default: pkt_len, prev_pkt_len, time_lag, prev_time_lag
-
+  -b, --bidir           Specify if dataframe is bidirectional. 
+                        Default: False
+  -B, --boxplot         Specify if boxplots are needed. 
+                        Default: False
 ```
 ### Example
 ```
-python3 dataframe_stats.py -i df.pkl
+python3 dataframe_stats.py -i df.pkl 
 
 dataframe_stats.py -| Checking set features to be valid...                                                                                                                          [DONE]
 dataframe_stats.py -| Loading from file test.df...                                                                                                                                  [DONE]
@@ -159,6 +213,9 @@ optional arguments:
                         Specify the list of features considered for training
                         (X). This should not contain the 'Label' (y). Default:
                         pkt_len, prev_pkt_len, time_lag, prev_time_lag
+  -o OUTPUT, --output OUTPUT
+                        Specify output dir for PRC, shapley, etc.
+
   -S, --generate-shapley
                         Specify whether to generate SHAPLEY values after
                         testing (Default: False)
