@@ -19,6 +19,13 @@ Almost everything from scikit-learn, mathplotlib, pandas, numpy and, most import
 
 # Tools/scripts provided
 ## `create_dataframe.py`
+This is one of the main tools that creates the corresponding Pandas dataframes for training, testing, and much more.
+You only have to fed this script with the directory of the .csv files or the files/directories one-by-one...as you wish.
+Every final feature is based on flows, but you don't have to do anything with this, the script does it automatically.
+
+For instance, every flow's packets will be automatically relabelled to DoH if there was at least one DoH packet within the same flow. 
+Accordingly, you _do not_ have to specify any IP address or whatnot to indicate this...just leave it to this guy.
+
 ```
 Create Panda dataframes for doh_ml from .csv files generated via doh_docker container
 
