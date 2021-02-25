@@ -32,6 +32,13 @@ class Logger(object):
     **kwargs are for future use
     '''
     self.called_from = called_from
+    l=len(self.called_from)
+    pad=" "
+    if l < 20:
+      padding=(20-l)*pad
+    self.called_from+=padding
+    # print(self.called_from)
+
     ## FOR COLORING
     self.OK="OK"
     self.FAIL="FAIL"

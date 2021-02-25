@@ -31,6 +31,7 @@ import shap
 import warnings
 
 import analysis as analysis
+import misc as misc
 
 parser = argparse.ArgumentParser(description="This script is for training a " + 
                                 "model from DoH traces and test it right away " + 
@@ -72,8 +73,8 @@ parser.add_argument('-o',
                     action="store",
                     type=str,
                     dest="output",
-                    default="output_",
-                    help="Specify output basename used for PRC, shapley, etc.")   
+                    default=None,
+                    help="Specify output dir for PRC, shapley, etc.")   
 
 parser.add_argument('-S',
                     '--generate-shapley',
@@ -139,6 +140,8 @@ logger.log("Checking set features to be valid...",logger.OK)
 
 
 TRAIN_DATAFRAME = args.train_dataframe
+BASENAME = os.path.basename(TRAIN_DATAFRAME).split(".")[0]
+
 ML_MODEL_PATH = args.ml_model_path
 # DO WE WANT SHAPLEY VALUES?
 SHAPLEY=args.generate_shapley
@@ -151,6 +154,9 @@ ROC_AUC = args.generate_roc_auc
 
 # WE NEED A BASE OUTPUT NAME FOR THE ABOVE THREE FUNCTIONS
 OUTPUT = args.output
+misc.directory_creator(OUTPUT)
+
+
 
 
 # CPU cores to use
@@ -270,11 +276,11 @@ logger.log_simple("END CLOSED WORLD SETTING",logger.TITLE_CLOSE)
 
 
 if(SHAPLEY):
-  analysis.make_shap(rfc, dataframe, OUTPUT, FEATURES)
+  analysis.make_shap(rfc, dataframe, OUTPUT+"/"+BASENAME, FEATURES)
 if PRC:
-  analysis.generate_pr_csv(rfc, dataframe, OUTPUT, FEATURES)
+  analysis.generate_pr_csv(rfc, dataframe, OUTPUT+"/"+BASENAME, FEATURES)
 if ROC_AUC:
-  analysis.generate_roc_auc_csv(rfc, dataframe, OUTPUT, FEATURES)
+  analysis.generate_roc_auc_csv(rfc, dataframe, OUTPUT+"/"+BASENAME, FEATURES)
 
 
 

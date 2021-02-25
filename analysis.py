@@ -52,8 +52,8 @@ def make_shap(model, dataframe, basename, features):
       shap_interaction_values = shap_interaction_values[1]
   shap.summary_plot(shap_values, shap_features, plot_type="bar", show=False)
  
-  pyplot.savefig(basename+".shapley.pdf")
-  pyplot.savefig(basename+".shapley.png")
+  pyplot.savefig(basename+"_SHAPLEY.pdf")
+  pyplot.savefig(basename+"_SHAPLEY.png")
 
 
 def generate_roc_auc_csv(model, dataframe, basename, features, max_fpr=None):
@@ -75,7 +75,7 @@ def generate_roc_auc_csv(model, dataframe, basename, features, max_fpr=None):
 
   fpr, tpr, _ = roc_curve(y, lr_probs[:,1])
 
-  basename+="ROC_AUC_"
+  basename+="_ROC_AUC"
   csv_file  = basename + ".csv"
   plot_file = basename + ".pdf"
   plot_file_png = basename + ".png"
@@ -114,7 +114,7 @@ def generate_pr_csv(model, dataframe, basename, features):
   # print("lr_probs[:, 1]:{}".format(lr_probs))
   lr_precision, lr_recall, threshold = precision_recall_curve(y, lr_probs)
 
-  basename+="PRC_"
+  basename+="_PRC"
   csv_file  = basename + ".csv"
   plot_file = basename + ".pdf"
   plot_file_png = basename + ".png"

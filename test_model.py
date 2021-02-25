@@ -30,7 +30,7 @@ import math
 
 import sys
 
-
+import misc as misc
 
 
 import analysis as analysis
@@ -64,7 +64,7 @@ parser.add_argument('-o',
                     type=str,
                     dest="output",
                     default="output_",
-                    help="Specify output basename used for PRC, shapley, etc.")   
+                    help="Specify output dir for PRC, shapley, etc.")   
 
 parser.add_argument('-f',
                     '--features',
@@ -130,12 +130,17 @@ for f in FEATURES:
 logger.log("Checking set features to be valid...",logger.OK)
 
 TEST_DATAFRAME = args.test_dataframe
+BASENAME = os.path.basename(TEST_DATAFRAME).split(".")[0]
+
 ML_MODEL_PATH = args.ml_model_path
 SHAPLEY = args.generate_shapley
 PRC = args.generate_prc
 ROC_AUC = args.generate_roc_auc
 CPU_CORES = args.cpu_core_num
+
 OUTPUT = args.output
+#create output dir if not exists
+misc.directory_creator(OUTPUT)
 
 def load_source(path, label):
   '''
@@ -193,7 +198,7 @@ def test_model(model, data):
   logger.log_simple("Recall:    {}".format(metrics.recall_score(y, rfc_pred)))
   logger.log_simple("F1 Score:  {}".format(metrics.f1_score(y,rfc_pred)))
   logger.log_simple("Confusion Matrix :\n{}".format(metrics.confusion_matrix(y, rfc_pred)))
-  logger.log_simple("Again, the features used for training: {}".format(FEATURES))
+  logger.log_simple("Again, the features used for testing: {}".format(FEATURES))
 
   logger.log_simple("OPEN-WORLD SETTINGS", logger.TITLE_CLOSE)
 
@@ -212,8 +217,8 @@ logger.log_simple("Features used for testing: {}".format(FEATURES))
 test_model(rfc,dataframe)
 
 if(SHAPLEY):
-  analysis.make_shap(rfc, dataframe, OUTPUT, FEATURES)
+  analysis.make_shap(rfc, dataframe, OUTPUT+"/"+BASENAME, FEATURES)
 if PRC:
-  analysis.generate_pr_csv(rfc, dataframe, OUTPUT, FEATURES)
+  analysis.generate_pr_csv(rfc, dataframe, OUTPUT+"/"+BASENAME, FEATURES)
 if ROC_AUC:
-  analysis.generate_roc_auc_csv(rfc, dataframe, OUTPUT, FEATURES)
+  analysis.generate_roc_auc_csv(rfc, dataframe, OUTPUT+"/"+BASENAME, FEATURES)

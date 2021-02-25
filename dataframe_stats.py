@@ -10,6 +10,8 @@ import os
 #import own logger function
 from logger import Logger
 SELF="dataframe_stats.py"
+#instantiate logger class
+logger = Logger(SELF)
 
 
 # for histogram generation
@@ -19,6 +21,9 @@ from matplotlib import pyplot
 # Force matplotlib to not use any Xwindows backend - otherwise cannot run script in screen, for instance.
 matplotlib.use('Agg')
 ###
+
+#for directory checking and creation
+import misc as misc
 
 
 parser = argparse.ArgumentParser(description="Brief analysis of dataframes " +
@@ -35,13 +40,13 @@ parser.add_argument('-i',
                     dest="dataframe_path",
                     help="Specify here the path to the dataframe")
 
-# parser.add_argument('-o',
-#                     '--output',
-#                     action="store",
-#                     type=str,
-#                     dest="output",
-#                     default="output_",
-#                     help="Specify output basename used for boxplots, etc.") 
+parser.add_argument('-o',
+                    '--output',
+                    action="store",
+                    type=str,
+                    dest="output",
+                    default="output",
+                    help="Specify output directory for boxplots, etc.") 
 
 parser.add_argument('-H',
                     '--generate-histogram',
@@ -88,12 +93,12 @@ DATAFRAME_PATH=args.dataframe_path
 DATAFRAME_NAME=os.path.basename(DATAFRAME_PATH).split(".")[0]
 
 #we don't need OUTPUT as we have the DATAFRAME_NAME as a basename
-# OUTPUT = args.output
-
+OUTPUT = args.output
+misc.directory_creator(OUTPUT)
 
 # DO WE WANT HISTOGRAM?
 HISTOGRAM=args.generate_histogram
-HISTOGRAM_PATH="histograms/"
+
 
 #Packets are still bidirectional in the dataframe?
 BIDIR=args.bidir
@@ -101,8 +106,7 @@ BIDIR=args.bidir
 #Boxplots?
 BOXPLOT=args.boxplot
 
-#instantiate logger class
-logger = Logger(SELF)
+
 
 #check upfront whether set features are valid
 POSSIBLE_FEATURES = ['pkt_len','prev_pkt_len','time_lag','prev_time_lag','prev_pkt_time_lag'] #temporarily added the last element
@@ -167,8 +171,8 @@ def generate_histogram(dataframe, bin_start, bin_stop, bin_step, column_name, fi
   # fig.subtitle('test title', fontsize=20)
   pyplot.xlabel(xlabel)
   pyplot.ylabel(ylabel)
-  pyplot.savefig(HISTOGRAM_PATH+filename_base+".pdf")
-  pyplot.savefig(HISTOGRAM_PATH+filename_base+".png")
+  pyplot.savefig(OUTPUT+"/"+filename_base+".pdf")
+  pyplot.savefig(OUTPUT+"/"+filename_base+".png")
   logger.log(str("Generating histogram {}...".format(column_name)),logger.OK)
   
 def generate_boxplot(doh_req,web_req, doh_resp=None,web_resp=None):
@@ -222,7 +226,7 @@ def generate_boxplot(doh_req,web_req, doh_resp=None,web_resp=None):
   ax.set_xlabel("Different types of packets", size=TS)
   ax.tick_params(labelsize = LS)
   ax.set_ylabel('Size [B]', size=TS)
-  pyplot.savefig("boxplot_"+DATAFRAME_NAME+"_pkt_len.pdf", bbox_inches='tight')
+  pyplot.savefig(OUTPUT+"/"+"boxplot_"+DATAFRAME_NAME+"_pkt_len.pdf", bbox_inches='tight')
 
   fig, ax = pyplot.subplots()
   ax.boxplot(prev_pkt_len, showfliers=False)
@@ -230,7 +234,7 @@ def generate_boxplot(doh_req,web_req, doh_resp=None,web_resp=None):
   ax.set_xlabel("Different types of packets", size=TS)
   ax.tick_params(labelsize = LS)
   ax.set_ylabel('Size [B]', size=TS)
-  pyplot.savefig("boxplot_"+DATAFRAME_NAME+"_prev_pkt_len.pdf", bbox_inches='tight')
+  pyplot.savefig(OUTPUT+"/"+"boxplot_"+DATAFRAME_NAME+"_prev_pkt_len.pdf", bbox_inches='tight')
 
   fig, ax = pyplot.subplots()
   ax.boxplot(time_lag, showfliers=False)
@@ -238,7 +242,7 @@ def generate_boxplot(doh_req,web_req, doh_resp=None,web_resp=None):
   ax.set_xlabel("Different types of packets", size=TS)
   ax.tick_params(labelsize = LS)
   ax.set_ylabel('Time lag [s]', size=TS)
-  pyplot.savefig("boxplot_"+DATAFRAME_NAME+"_time_lag.pdf", bbox_inches='tight')
+  pyplot.savefig(OUTPUT+"/"+"boxplot_"+DATAFRAME_NAME+"_time_lag.pdf", bbox_inches='tight')
 
   fig, ax = pyplot.subplots()
   ax.boxplot(prev_time_lag, showfliers=False)
@@ -246,7 +250,7 @@ def generate_boxplot(doh_req,web_req, doh_resp=None,web_resp=None):
   ax.set_xlabel("Different types of packets", size=TS)
   ax.tick_params(labelsize = LS)
   ax.set_ylabel('Time lag [s]', size=TS)
-  pyplot.savefig("boxplot_"+DATAFRAME_NAME+"_prev_time_lag.pdf", bbox_inches='tight')
+  pyplot.savefig(OUTPUT+"/"+"boxplot_"+DATAFRAME_NAME+"_prev_time_lag.pdf", bbox_inches='tight')
 
 
 
@@ -274,6 +278,9 @@ if BIDIR:
   doh_responses = doh_packets[doh_packets["direction"]=="response"]
   web_requests  = web_packets[web_packets["direction"]=="request"]
   web_responses = web_packets[web_packets["direction"]=="response"]
+else:
+  doh_requests  = doh_packets #[doh_packets["direction"]=="request"]
+  web_requests  = web_packets #[web_packets["direction"]=="request"]
 
 logger.log_simple("Number of packets: {}".format(sum))
 logger.log_simple("Number of DoH packets: {} ({:.2f}%)".format(doh, doh/sum*100))
@@ -325,21 +332,10 @@ if BIDIR:
 
   logger.log_simple("End Describing Web responses", logger.TITLE_CLOSE)
 
-logger.log_simple("END STATISITCS", logger.TITLE_CLOSE)
+logger.log_simple("END STATISTICS", logger.TITLE_CLOSE)
 
 if(HISTOGRAM):
-  logger.log_simple("HISTOGRAMS", logger.TITLE_OPEN)
-  #check if directory exists
-  if not os.path.isdir(HISTOGRAM_PATH):
-    logger.log(str("Creating histogram directory {}...".format(HISTOGRAM_PATH)))
-    
-    try:
-      os.mkdir(HISTOGRAM_PATH)
-      logger.log(str("Creating histogram directory {}...".format(HISTOGRAM_PATH),logger.OK))
-    except:
-      logger.log(str("Creating histogram directory {}...".format(HISTOGRAM_PATH),logger.FAIL))
-      logger.log_simple(str("Could not create histogram directory {}".format(HISTOGRAM_PATH)))
-    
+  # logger.log_simple("HISTOGRAMS", logger.TITLE_OPEN)
   generate_histogram(dataframe, 
                       50, 
                       300, 
@@ -369,7 +365,10 @@ if(HISTOGRAM):
                       "histogram_prev_time_lag_"+DATAFRAME_NAME, 
                       "Time lag [s]")
 
-  logger.log_simple("END HISTOGRAMS", logger.TITLE_CLOSE)
+  # logger.log_simple("END HISTOGRAMS", logger.TITLE_CLOSE)
 
 if (BOXPLOT):
-  generate_boxplot(doh_requests,web_requests, doh_resp=doh_responses,web_resp=web_responses)
+  if(BIDIR):
+    generate_boxplot(doh_requests,web_requests, doh_resp=doh_responses,web_resp=web_responses)
+  else:
+    generate_boxplot(doh_requests,web_requests)
