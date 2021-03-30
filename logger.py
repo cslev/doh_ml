@@ -37,6 +37,10 @@ class Logger(object):
     if l < 20:
       padding=(20-l)*pad
     self.called_from+=padding
+
+    self.logfile = kwargs.get('logfile',None)
+    
+
     # print(self.called_from)
 
     ## FOR COLORING
@@ -95,10 +99,23 @@ class Logger(object):
                                                 msg,
                                                 white_space, #padding
                                                 self.STATUS_MSG[status]))) #closing tag 
+        if(self.logfile is not None):
+          
+          self.f = open(self.logfile, "a")
+          self.f.write(str("{}{}{}{}\n\n".format(prefix, #the prefix (called_from)
+                                                msg,
+                                                white_space, #padding
+                                                self.STATUS_MSG[status]))) #closing tag
+          self.f.close()
       
       else: #no space for padding, use a Tab and don't care :D
         sys.stdout.write(str("{}\t{}\n".format(prefix+msg, #the actual content
                                               self.STATUS_MSG[status]))) #closing tag
+        if(self.logfile is not None):
+          self.f = open(self.logfile, "a")
+          self.f.write(str("{}\t{}\n\n".format(prefix+msg, #the actual content
+                                              self.STATUS_MSG[status]))) #closing tag
+          self.f.close()
       sys.stdout.flush()
 
 
@@ -126,6 +143,10 @@ class Logger(object):
         line = str("{}{}{} -| {}{}{}".format(ITALIC+BOLD,self.called_from,RESET, prefix, msg, postfix)) # the full line of message
 
     print(line)
+    if(self.logfile is not None):
+      self.f = open(self.logfile, "a")
+      self.f.write(line + str("\n"))
+      self.f.close()
 
 
   def calculateRemainingPercentage(self, current, n, task):

@@ -10,9 +10,11 @@ import argcomplete #for BASH autocompletion
 import pandas as pd #for pandas
 import numpy as np #for padding
 
-from os import path,walk #for checking paths, dirs, and looping through the files within a dir
+from os import path,walk,listdir #for checking paths, dirs, and looping through the files within a dir
 import re # regexp for checking csv files convention
 import sys # for writing in the same line via sys.stdout
+
+import misc as misc
 
 from sklearn.utils import resample #for balancing the data set
 
@@ -98,6 +100,9 @@ args=parser.parse_args()
 #TRAFFIC_TRACE_PATHS=args.traffic_traces.split(",")
 TRAFFIC_TRACE_PATHS=args.traffic_traces
 DATAFRAME=args.dataframe_path
+#create directory if not exists
+misc.directory_creator(path.dirname(DATAFRAME))
+
 SINGLE_TRACE=None
 BALANCE_DATASET = args.balance_dataset
 
@@ -111,8 +116,8 @@ prev_http_time_lag = 0.0 # for padding techniques 4 and 5
 is_http_new = True # for padding techniques  5
 prev_http_packets = [] # for padding techniques 4 and 5
 # for padding techniques 4 and 5
-WEBPACKET_BUFFER_SIZE_PKTLEN = 30 #empirically the best among 5,10,20,30
-WEBPACKET_BUFFER_SIZE_TIMELAG = 50 #empirically the best among 5,10,20,30
+WEBPACKET_BUFFER_SIZE_PKTLEN = 20 #empirically the best among 5,10,20,30
+WEBPACKET_BUFFER_SIZE_TIMELAG = 20 #empirically the best among 5,10,20,30
 RFC_PADDING=dict()
 for i in range(1,12):
     RFC_PADDING[i]=i*128
@@ -127,6 +132,28 @@ SELF="create_dataframe.py"
 logger = Logger(SELF)
 
 traffic_traces=list()
+
+#this is the main regular expression to match on the csv files
+REGEXP="^csvfile-[0-9]*-[0-9]*-[0-9]*.csv"
+
+
+def check_csv_files_existance(dir):
+  files = listdir(dir)
+  csv_file_exists = False
+  for filename in files:
+    if(re.search(REGEXP,filename) is not None):  
+      csv_file_exists = True
+      break
+
+  # csv_file_list = [ filename for filename in files if (re.search("^csvfile-[0-9]*-[0-9]*.csv",filename) is not None) ]
+  # if len(csv_file_list) == 0:
+  if not csv_file_exists:
+    logger.log_simple(str("No .csv file in {} complying with the naming convention {}}".format(dir,REGEXP)))
+    logger.log_simple("Did you extract the archives properly?")
+    logger.log_simple("Exiting...")
+    exit(-1)
+  else:
+     logger.log_simple(str("Good-looking .csv files have been found in {}".format(dir)))
 
 
 #used for progress tracking in lambda functions
@@ -151,8 +178,13 @@ for p in TRAFFIC_TRACE_PATHS:
   if path.isdir(p):
     # print("\tDirectory of .csv files found".format(p))  
     logger.log(str("Directory {}...".format(p)),logger.FOUND)
+    #check whether there is any csv file in the directory
+    check_csv_files_existance(p)
+
     #Second parameter helps us to know that this path is for a whole directory
     traffic_traces.append((p,False))
+
+
 
 
 ### PADDING RELATED FUNCTIONS
@@ -1138,11 +1170,14 @@ def create_dataframe():
       for _,_,filename in walk(path): #walking through the directory
         files.extend(filename)
         break #to not go into subdirs and only list files
+
+      #sort filenames alphabetically
+      files.sort()
       
       #### Prepare files and their paths for easier processing
       tmp_files=[] #remove any files that are not compliant with the .csv files' naming patterns
       for f in files:
-        if(re.search("^csvfile-[0-9]*-[0-9]*.csv",f)) is not None: #regexp for doh_docker specific csvfiles only
+        if(re.search(REGEXP,f)) is not None: #regexp for doh_docker specific csvfiles only
           tmp_files.append(path+"/"+f)
       files=tmp_files #update files list with the filtered results
       
@@ -1202,9 +1237,6 @@ def create_dataframe():
   else: 
     logger.log("Remove response packets according to direction...",logger.SKIP)
 
-  #update labels according to whether the corresponding flow is DoH 
-  dataframe=relabel_outlier_flows(dataframe)
-
   #add time lag 
   dataframe=add_time_lag(dataframe)
 
@@ -1221,7 +1253,7 @@ def create_dataframe():
   dataframe=add_prev_time_lag(dataframe)
 
   # #update labels according to whether the corresponding flow is DoH 
-  # dataframe=relabel_outlier_flows(dataframe)
+  dataframe=relabel_outlier_flows(dataframe)
 
   #balancing the dataset after all relative features are set
   if(BALANCE_DATASET):

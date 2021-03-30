@@ -48,6 +48,16 @@ parser.add_argument('-t',
                     help="Specify the full path for the dataframe "+
                     "used for training")
 
+parser.add_argument('-s',
+                    '--test-split',
+                    action="store",
+                    type=int,
+                    dest="test_split",
+                    required=True,
+                    help="Specify the train-test split ratio here by defining "+
+                    "the percentage for the test size, i.e., -s 10 means "+
+                    "90:10 train:test ratio")
+
 parser.add_argument('-m',
                     '--ml-model-path',
                     action="store",
@@ -73,7 +83,7 @@ parser.add_argument('-o',
                     action="store",
                     type=str,
                     dest="output",
-                    default=None,
+                    default="output_",
                     help="Specify output dir for PRC, shapley, etc.")   
 
 parser.add_argument('-S',
@@ -119,13 +129,28 @@ parser.add_argument('-C',
                     "with the number of fold you want to use (Default: No " + 
                     "cross validation")
 
+parser.add_argument('-M',
+                    '--meta',
+                    action="store",
+                    default=None,
+                    type=str,
+                    dest="meta",
+                    help="Specify here any meta information used for naming " +
+                    "the output files (Default: None - dataframe name will be " + 
+                    "used as a base)")
 
 #for BASH autocomplete  
 argcomplete.autocomplete(parser)
 args=parser.parse_args()
 
+# WE NEED A BASE OUTPUT NAME FOR THE ABOVE THREE FUNCTIONS
+OUTPUT = args.output
+misc.directory_creator(OUTPUT)
+
+META=args.meta
+
 SELF="train_model.py"
-logger = Logger(SELF)
+logger = Logger(SELF,logfile=OUTPUT+"/train.log")
 
 #check upfront whether set features are valid
 POSSIBLE_FEATURES = ['pkt_len','prev_pkt_len','time_lag','prev_time_lag','prev_pkt_time_lag'] #temporarily added the last element
@@ -152,17 +177,18 @@ PRC=args.generate_prc
 # DO WE WANT ROC AUC CURVE?
 ROC_AUC = args.generate_roc_auc
 
-# WE NEED A BASE OUTPUT NAME FOR THE ABOVE THREE FUNCTIONS
-OUTPUT = args.output
-misc.directory_creator(OUTPUT)
-
-
+logger.log("Checking pre-set test split...")
+TEST_SPLIT = args.test_split
+if TEST_SPLIT < 0 or TEST_SPLIT > 100:
+  logger.log("Checking pre-set test split...",logger.FAIL)
+  exit(-1)
+else:
+  logger.log(str("Checking pre-set test split...{}:{}".format(TEST_SPLIT, (100-TEST_SPLIT))),logger.OK)
+  TEST_SPLIT = TEST_SPLIT / 100
 
 
 # CPU cores to use
 CPU_CORES=args.cpu_core_num
-
-
 
 # DO WE WANT CROSS-VALIDATION
 CROSS_VALIDATION = args.cross_validation
@@ -245,17 +271,17 @@ if(CROSS_VALIDATION is not None):
     logger.log_simple(" --> Recall:    {}".format(results[f]["recall"]))
     logger.log_simple(" --> F1-score:  {}".format(results[f]["f1-score"]))
     logger.log_simple(" --> Score:  {}".format(results[f]["score"]))
-    logger.log_simple(" --> Confusion Matrix:\n{}".format(results[f]["c_matrix"]))
+    logger.log_simple(" --> Confusion Matrix for {} :\n{}".format(BASENAME, results[f]["c_matrix"]))
   
   logger.log_simple("Again, the features used for training: {}".format(FEATURES))
   logger.log_simple("END CROSS VALIDATION",logger.TITLE_CLOSE)
 
 
 else:
-  #train-test splitting (90-10)
+  #train-test splitting according to TEST_SPLIT var set by runtime argument
   X_train, X_test, y_train, y_test = train_test_split(X, 
                                                       y, 
-                                                      test_size=0.1, 
+                                                      test_size=TEST_SPLIT, 
                                                       random_state=109)
 
 
@@ -265,22 +291,27 @@ else:
   
   logger.log_simple("CLOSED WORLD SETTING",logger.TITLE_OPEN)
   rfc_pred = rfc.predict(X_test)
+  logger.log_simple("Train-test split ration: {}:{}".format(int(TEST_SPLIT*100), int((1-TEST_SPLIT)*100)))
   logger.log_simple("Accuracy : {}".format(metrics.accuracy_score(y_test, rfc_pred)))
   logger.log_simple("Precision: {}".format(metrics.precision_score(y_test,rfc_pred)))
   logger.log_simple("Recall:    {}".format(metrics.recall_score(y_test, rfc_pred)))
   logger.log_simple("F1 Score:  {}".format(metrics.f1_score(y_test,rfc_pred)))
-  logger.log_simple("Confusion Matrix :\n{}".format(metrics.confusion_matrix(y_test, rfc_pred)))
+  logger.log_simple("Confusion Matrix for {} :\n{}".format(BASENAME, metrics.confusion_matrix(y_test, rfc_pred)))
   logger.log_simple("Again, the features used for training: {}".format(FEATURES))
 
 logger.log_simple("END CLOSED WORLD SETTING",logger.TITLE_CLOSE)
 
 
+if META is None:
+  outputname = OUTPUT+"/"+BASENAME
+else:
+  outputname = OUTPUT+"/"+META
 if(SHAPLEY):
-  analysis.make_shap(rfc, dataframe, OUTPUT+"/"+BASENAME, FEATURES)
-if PRC:
-  analysis.generate_pr_csv(rfc, dataframe, OUTPUT+"/"+BASENAME, FEATURES)
-if ROC_AUC:
-  analysis.generate_roc_auc_csv(rfc, dataframe, OUTPUT+"/"+BASENAME, FEATURES)
+  analysis.make_shap(rfc, dataframe, outputname, FEATURES)
+if(PRC):
+  analysis.generate_pr_csv(rfc, dataframe,outputname, FEATURES)
+if(ROC_AUC):
+  analysis.generate_roc_auc_csv(rfc, dataframe,outputname, FEATURES)
 
 
 

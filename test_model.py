@@ -109,14 +109,34 @@ parser.add_argument('-c',
                     type=int,
                     dest="cpu_core_num",
                     help="Specify here the number of CPU cores to use for " +
-                    "parallel jobs (Default: 1)")                                       
+                    "parallel jobs (Default: 1)")         
+
+parser.add_argument('-M',
+                    '--meta',
+                    action="store",
+                    default=None,
+                    type=str,
+                    dest="meta",
+                    help="Specify here any meta information used for naming " +
+                    "the output files (Default: None - dataframe name will be " + 
+                    "used as a base)")
 
 #for BASH autocomplete  
 argcomplete.autocomplete(parser)
 args=parser.parse_args()
 
+OUTPUT = args.output
+#create output dir if not exists
+misc.directory_creator(OUTPUT)
+
+META=args.meta
+
+
+TEST_DATAFRAME = args.test_dataframe
+BASENAME = os.path.basename(TEST_DATAFRAME).split(".")[0]
+
 SELF="test_model.py"
-logger = Logger(SELF)                    
+logger = Logger(SELF,logfile=OUTPUT+"/"+BASENAME+"_"+"test.log")                  
 
 #check upfront whether set features are valid
 POSSIBLE_FEATURES = ['pkt_len','prev_pkt_len','time_lag','prev_time_lag','prev_pkt_time_lag'] #temporarily added the last element
@@ -129,8 +149,7 @@ for f in FEATURES:
     exit(-1)
 logger.log("Checking set features to be valid...",logger.OK)
 
-TEST_DATAFRAME = args.test_dataframe
-BASENAME = os.path.basename(TEST_DATAFRAME).split(".")[0]
+
 
 ML_MODEL_PATH = args.ml_model_path
 SHAPLEY = args.generate_shapley
@@ -138,9 +157,7 @@ PRC = args.generate_prc
 ROC_AUC = args.generate_roc_auc
 CPU_CORES = args.cpu_core_num
 
-OUTPUT = args.output
-#create output dir if not exists
-misc.directory_creator(OUTPUT)
+
 
 def load_source(path, label):
   '''
@@ -189,15 +206,15 @@ def test_model(model, data):
 
   logger.log_simple("OPEN-WORLD SETTINGS",logger.TITLE_OPEN)
 
-  logger.log("Testing model...")
+  logger.log(str("Testing model on {}...".format(BASENAME)))
   rfc_pred = rfc.predict(X)
-  logger.log("Testing model...",logger.OK)
+  logger.log(str("Testing model on {}...".format(BASENAME)), logger.OK)
 
   logger.log_simple("Accuracy : {}".format(metrics.accuracy_score(y, rfc_pred)))
   logger.log_simple("Precision: {}".format(metrics.precision_score(y,rfc_pred)))
   logger.log_simple("Recall:    {}".format(metrics.recall_score(y, rfc_pred)))
   logger.log_simple("F1 Score:  {}".format(metrics.f1_score(y,rfc_pred)))
-  logger.log_simple("Confusion Matrix :\n{}".format(metrics.confusion_matrix(y, rfc_pred)))
+  logger.log_simple("Confusion Matrix for {} :\n{}".format(BASENAME, metrics.confusion_matrix(y, rfc_pred)))
   logger.log_simple("Again, the features used for testing: {}".format(FEATURES))
 
   logger.log_simple("OPEN-WORLD SETTINGS", logger.TITLE_CLOSE)
@@ -216,9 +233,13 @@ logger.log_simple("Features used for testing: {}".format(FEATURES))
 
 test_model(rfc,dataframe)
 
+if META is None:
+  outputname = OUTPUT+"/"+BASENAME
+else:
+  outputname = OUTPUT+"/"+META
 if(SHAPLEY):
-  analysis.make_shap(rfc, dataframe, OUTPUT+"/"+BASENAME, FEATURES)
-if PRC:
-  analysis.generate_pr_csv(rfc, dataframe, OUTPUT+"/"+BASENAME, FEATURES)
-if ROC_AUC:
-  analysis.generate_roc_auc_csv(rfc, dataframe, OUTPUT+"/"+BASENAME, FEATURES)
+  analysis.make_shap(rfc, dataframe, outputname, FEATURES)
+if(PRC):
+  analysis.generate_pr_csv(rfc, dataframe,outputname, FEATURES)
+if(ROC_AUC):
+  analysis.generate_roc_auc_csv(rfc, dataframe,outputname, FEATURES)
