@@ -1,0 +1,409 @@
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.10.9                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe data_raw/SG/cloudflare.pkl...                                  [1;31m[FAIL][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| File not found
+[;3m[;1mtrain_model.py      [0;0m -| Exiting...
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.10.9                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/cloudflare.pkl...                                [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.996277816981901
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9941011698797166
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9997265880676405
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.99690594315032
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[ 79813    716]
+ [    33 120664]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cf.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.20.8                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/cloudflare.pkl...                                [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9961361851848171
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9939400413309724
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9996694296835615
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9967965027286381
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[158971   1475]
+ [    80 241926]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cf.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.30.7                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/cloudflare.pkl...                                [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9961502655389132
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9939763487532602
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9996614508071509
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9968107938982419
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[238162   2201]
+ [   123 363192]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cf.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.30.7                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/google.pkl...                                    [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9842371524999131
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9895882969098653
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9866762384547283
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9881301221991657
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[235772   4960]
+ [  6366 471427]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cf.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.20.8                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/google.pkl...                                    [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9842510808593432
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9895629074038519
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9867304825421734
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9881446652565146
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[157076   3316]
+ [  4228 314397]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cf.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.10.9                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/google.pkl...                                    [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9843847204071663
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9896065330363771
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9868993989283608
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9882511120605162
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[ 78475   1652]
+ [  2088 157294]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cf.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.10.9                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/cleanbrowsing.pkl...                             [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9993314988417829
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9994922197741669
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9993976059137888
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9994449106047893
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[ 76707     59]
+ [    70 116133]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cb.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.20.8                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/cleanbrowsing.pkl...                             [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9993314988417829
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9995224861693066
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.999367714740419
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9994450944629891
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[153337    111]
+ [   147 232343]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cb.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.30.7                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/cleanbrowsing.pkl...                             [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9993124975168723
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9994639867917173
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9993952352563514
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9994296098416666
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[229824    187]
+ [   211 348685]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cb.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.10.9                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/quad9.pkl...                                     [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9942420144467952
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9989108054071797
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9920280942996429
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9954575530261914
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[ 77107    146]
+ [  1076 133898]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cb.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.20.8                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/quad9.pkl...                                     [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9942396449076811
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.998912075588392
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9920336562298806
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9954609839547175
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[153899    292]
+ [  2153 268109]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cb.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.30.7                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/quad9.pkl...                                     [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9941352013570396
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9988381878709792
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9919480692377292
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9953812051912581
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[230595    468]
+ [  3266 402351]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cb.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.10.9                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/cleanbrowsing.pkl...                             [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9993263166622618
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.999475020439778
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9994062115435918
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9994406148073564
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[ 76705     61]
+ [    69 116134]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cf.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.20.8                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/cleanbrowsing.pkl...                             [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9993263166622618
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9995138864989503
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.999367714740419
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9994407952751503
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[153335    113]
+ [   147 232343]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cf.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...0.30.7                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/cleanbrowsing.pkl...                             [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.999319407089567
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9994668562288964
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.999403833807209
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9994353440245354
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[229825    186]
+ [   208 348688]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cf.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...10:90                                                  [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/quad9.pkl...                                     [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9942278786393814
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.998910781029685
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9920058677967608
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9954463505752468
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[ 77107    146]
+ [  1079 133895]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cf.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...20:80                                                  [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/quad9.pkl...                                     [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9942420008811341
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9989232328350646
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9920262560034337
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9954627982875962
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[153902    289]
+ [  2155 268107]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cf.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...30:70                                                  [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/quad9.pkl...                                     [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9941461958911856
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9988481150296163
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.9919554653774373
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9953898581827852
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix :
+[[230599    464]
+ [  3263 402354]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cf.pkl                                                   [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking set features to be valid...                                                 [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| Checking pre-set test split...30:70                                                  [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +-------------------------------------- INPUT DATA --------------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Loading for dataframe dataframes/SG/quad9.pkl...                                     [1;32m[DONE][0;0m
+
+[;3m[;1mtrain_model.py      [0;0m -| +==================================== END INPUT DATA ====================================+
+[;3m[;1mtrain_model.py      [0;0m -| Features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +--------------------------------- CLOSED WORLD SETTING ---------------------------------+
+[;3m[;1mtrain_model.py      [0;0m -| Train-test split ration: 30.0:70.0
+[;3m[;1mtrain_model.py      [0;0m -| Accuracy : 0.9941430545957153
+[;3m[;1mtrain_model.py      [0;0m -| Precision: 0.9988580167226073
+[;3m[;1mtrain_model.py      [0;0m -| Recall:    0.991940673098021
+[;3m[;1mtrain_model.py      [0;0m -| F1 Score:  0.9953873272103163
+[;3m[;1mtrain_model.py      [0;0m -| Confusion Matrix for quad9 :
+[[230603    460]
+ [  3269 402348]]
+[;3m[;1mtrain_model.py      [0;0m -| Again, the features used for training: ['pkt_len', 'prev_pkt_len', 'time_lag', 'prev_time_lag']
+[;3m[;1mtrain_model.py      [0;0m -| +=============================== END CLOSED WORLD SETTING ===============================+
+[;3m[;1mtrain_model.py      [0;0m -| Saving the model to /tmp/m1_cf.pkl                                                   [1;32m[DONE][0;0m
+
