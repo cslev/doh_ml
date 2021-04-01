@@ -6,8 +6,18 @@ The project constitutes several script files with different purpose. Formerly, e
 Let's see what you can do here.
 
 # Dissemination
-This repository has also been made for our [research paper](https://github.com/cslev/doh_ml/raw/main/DNS_over_HTTPS_identification.pdf) entitled **Privacy of DNS-over-HTTPS: Requiem for a Dream?** to appear at [IEEE Euro S&P](http://www.ieee-security.org/TC/EuroSP2021/).
+This repository has also been made for our [research paper](https://github.com/cslev/doh_ml/raw/main/DNS_over_HTTPS_identification.pdf) titled **Privacy of DNS-over-HTTPS: Requiem for a Dream?** to appear at [IEEE Euro S&P](http://www.ieee-security.org/TC/EuroSP2021/).
 
+When using the repo, please use the full reference to our paper as follows:
+```
+@inproceedings{doh_identification_ml,
+ author = {Levente Csikor and Himanshu Singh and Min Suk Kang and Dinil Mon Divakaran},
+ title = {{Privacy of DNS-over-HTTPS: Requiem for a Dream?}},
+ booktitle = {IEEE Euro Security and Privacy},
+ year = {2021}
+
+} 
+```
 
 # Lifecycle
 To start playing around with the project, there is a general lifecycle we have to follow. In the beginning, we only have raw data obtained via the `doh_docker` container. Hence, the lifecycle is as follows: 
