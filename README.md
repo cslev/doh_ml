@@ -9,14 +9,18 @@ Let's see what you can do here.
 This repository has also been made for our [research paper](https://github.com/cslev/doh_ml/raw/main/DNS_over_HTTPS_identification.pdf) titled **Privacy of DNS-over-HTTPS: Requiem for a Dream?** to appear at [IEEE Euro S&P](http://www.ieee-security.org/TC/EuroSP2021/).
 
 When using the repo, please use the full reference to our paper as follows:
+### Bibtex
 ```
 @inproceedings{doh_identification_ml,
  author = {Levente Csikor and Himanshu Singh and Min Suk Kang and Dinil Mon Divakaran},
  title = {{Privacy of DNS-over-HTTPS: Requiem for a Dream?}},
- booktitle = {IEEE Euro Security and Privacy},
+ booktitle = {IEEE European Symposium on Security and Privacy},
  year = {2021}
-
 } 
+```
+### Text
+```
+L. Csikor, H. Singh, M. S. Kang and D. M. Divakaran, "Privacy of DNS-over-HTTPS: Requiem for a Dream?", In proceedings of IEEE European Symposium on Security and Privacy, 2021.
 ```
 
 # Lifecycle
