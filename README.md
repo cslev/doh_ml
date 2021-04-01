@@ -1,7 +1,7 @@
 # doh_ml
 This repository is for processing the data gathered via [doh_docker](https://github.com/cslev/doh_docker) container via Python and ML techniques.
 
-Furthermore, this repository has been made for our [research paper]() entitled **Privacy of DNS-over-HTTPS: Requiem for a Dream?** to appear at [IEEE Euro S&P](http://www.ieee-security.org/TC/EuroSP2021/).
+Furthermore, this repository has been made for our [research paper](https://github.com/cslev/doh_ml/raw/main/DNS_over_HTTPS_identification.pdf) entitled **Privacy of DNS-over-HTTPS: Requiem for a Dream?** to appear at [IEEE Euro S&P](http://www.ieee-security.org/TC/EuroSP2021/).
 
 The project constitutes several script files with different purpose. Formerly, everything was in one big script file but that was non-manageable after some point.
 
